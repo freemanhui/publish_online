@@ -370,32 +370,57 @@
                     
                     // After successful conversion, create and open a standalone HTML file
                     try {
-                        // Create a blob with the converted HTML content
-                        const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
-                        const htmlUrl = URL.createObjectURL(htmlBlob);
+                        // Create the direct HTML file content
+                        const standaloneHtml = htmlContent;
                         
                         // Show success message
                         showStatus('PDF converted successfully! Your document has been converted to HTML.', 'success');
                         
-                        // Automatically open the converted HTML in a new tab
+                        // Create a download link for the HTML file
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(standaloneHtml);
+                        downloadLink.download = htmlFileName;
+                        
+                        // Ask if user wants to view the document now
                         if (confirm('Document converted successfully! View it now?')) {
-                            // Open the HTML file directly in a new tab
-                            window.open(htmlUrl, '_blank');
+                            // Open HTML in a new window instead of using blob URL
+                            const newWindow = window.open();
+                            if (newWindow) {
+                                newWindow.document.write(standaloneHtml);
+                                newWindow.document.close();
+                                newWindow.document.title = title;
+                            } else {
+                                alert('Your browser blocked opening a new window. The document will be downloaded instead.');
+                                document.body.appendChild(downloadLink);
+                                downloadLink.click();
+                                document.body.removeChild(downloadLink);
+                            }
                         }
                         
-                        // Also offer to save the converted document
+                        // Always offer to save the file
                         if (confirm('Would you like to save the HTML file to your device?')) {
-                            // Create a download link
-                            const downloadLink = document.createElement('a');
-                            downloadLink.href = htmlUrl;
-                            downloadLink.download = htmlFileName;
                             document.body.appendChild(downloadLink);
                             downloadLink.click();
                             document.body.removeChild(downloadLink);
                         }
                         
-                        // You might want to clean up the URL object eventually
-                        // setTimeout(() => URL.revokeObjectURL(htmlUrl), 60000); // Clean up after 1 minute
+                        // Add a download button to the page too
+                        const downloadButton = document.createElement('button');
+                        downloadButton.textContent = `Download "${htmlFileName}"`;
+                        downloadButton.style.marginTop = '20px';
+                        downloadButton.onclick = function() {
+                            const link = document.createElement('a');
+                            link.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(standaloneHtml);
+                            link.download = htmlFileName;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        };
+                        
+                        // Add the button to the page
+                        const statusDiv = document.getElementById('status-message');
+                        statusDiv.parentNode.insertBefore(downloadButton, statusDiv.nextSibling);
+                        
                     } catch (e) {
                         console.error('Error creating HTML file:', e);
                         showStatus('Conversion successful but there was an issue opening the file.', 'warning');
