@@ -185,16 +185,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title}</title>
-    <link rel="stylesheet" href="pdf-styles.css">
+    <style>
+        body {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            color: #333;
+            background-color: #fff;
+        }
+        h1 {
+            font-size: 2.2em;
+            margin-bottom: 1em;
+            color: #222;
+            text-align: center;
+        }
+        .page {
+            margin-bottom: 2em;
+            padding-bottom: 1em;
+            border-bottom: 1px solid #eee;
+        }
+        .page-number {
+            text-align: center;
+            color: #888;
+            font-size: 0.9em;
+            margin: 1em 0;
+        }
+        p {
+            margin-bottom: 1em;
+        }
+        .text-line {
+            margin-bottom: 0.6em;
+        }
+        @media print {
+            body {
+                padding: 0;
+                max-width: none;
+            }
+            .page-number {
+                position: absolute;
+                bottom: 20px;
+                width: 100%;
+                left: 0;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="nav">
-        <a href="index.html">Home</a>
-        <a href="upload.html">PDF Converter</a>
-        <a href="documents.html">Document Library</a>
-    </div>
-    <div class="pdf-container">
-        <h1>${title}</h1>`;
+    <h1>${title}</h1>`;
                 
                 // Process each page
                 for (let i = 1; i <= numPages; i++) {
@@ -203,74 +242,49 @@
                     // Get the page
                     const page = await pdf.getPage(i);
                     
-                    // Create a canvas for rendering the page
-                    const viewport = page.getViewport({ scale: 1.5 });
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-                    
-                    // Render the page to canvas
-                    await page.render({ canvasContext: context, viewport: viewport }).promise;
-                    
-                    // Get text content with improved positioning
+                    // Get text content with positioning
                     const textContent = await page.getTextContent();
                     const textItems = textContent.items;
                     
-                    // Convert canvas to image
-                    const imgData = canvas.toDataURL('image/jpeg', 0.8);
+                    // Start a new page div
+                    htmlContent += `\n    <div class="page" id="page-${i}">`;
                     
-                    // Create a more structured text layer using a table-like approach
-                    // Group text by vertical position to better handle columns
-                    const textDivs = [];
+                    // Group text by vertical position to better handle columns and paragraphs
                     const textPositions = {};
                     
                     // First pass: determine text positions and group by similar y coordinates
                     textItems.forEach(item => {
-                        // Round y position to nearest 10px to group nearby text
-                        const yPos = Math.round(item.transform[5] / 10) * 10;
+                        // Round y position to nearest few pixels to group nearby text
+                        const yPos = Math.round(item.transform[5] / 3) * 3;
                         if (!textPositions[yPos]) {
                             textPositions[yPos] = [];
                         }
                         textPositions[yPos].push(item);
                     });
                     
-                    // Sort positions vertically
-                    const sortedYPositions = Object.keys(textPositions).sort((a, b) => parseInt(a) - parseInt(b));
+                    // Sort positions vertically from top to bottom
+                    const sortedYPositions = Object.keys(textPositions).sort((a, b) => parseInt(b) - parseInt(a));
                     
                     // Second pass: create lines of text for each group, sorted by x position
                     sortedYPositions.forEach(yPos => {
                         const lineItems = textPositions[yPos].sort((a, b) => a.transform[4] - b.transform[4]);
                         
-                        // Create a div for this line
-                        const lineText = lineItems.map(item => {
-                            // Check if it's a space
-                            if (item.str.trim() === '') {
-                                return ' ';
-                            }
-                            return item.str;
-                        }).join(' ');
+                        // Create clean text for this line, joining words with proper spacing
+                        const lineText = lineItems.map(item => item.str.trim()).filter(str => str.length > 0).join(' ');
                         
-                        textDivs.push(`<div class="text-line" style="top: ${yPos}px;">${lineText}</div>`);
+                        // Only add non-empty lines to the output
+                        if (lineText.trim().length > 0) {
+                            htmlContent += `\n        <div class="text-line">${lineText}</div>`;
+                        }
                     });
                     
-                    // Add page to HTML
-                    htmlContent += `
-        <div class="pdf-page" id="page-${i}">
-            <div class="page-number">Page ${i}</div>
-            <img src="${imgData}" alt="Page ${i}" class="page-image">
-            <div class="page-text">
-                ${textDivs.join('\n                ')}
-            </div>
-        </div>`;
+                    // Add page number and close the page div
+                    htmlContent += `\n        <div class="page-number">Page ${i} of ${numPages}</div>`;
+                    htmlContent += `\n    </div>`;
                 }
                 
                 // Close HTML
-                htmlContent += `
-    </div>
-    <script src="pdf-viewer.js"><\/script>
-</body>
-</html>`;
+                htmlContent += `\n</body>\n</html>`;
                 
                 // Add more debugging info
                 console.log('PDF conversion successful, preparing to save to localStorage');
