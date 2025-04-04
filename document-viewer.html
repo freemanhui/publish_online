@@ -125,7 +125,51 @@
                     
                     if (documentUrl) {
                         // If we have a URL (which should work for larger documents)
-                        iframe.src = documentUrl;
+                        try {
+                            // Add error handling for the iframe
+                            iframe.onerror = function() {
+                                console.error('Error loading document URL');
+                                // Fall back to preview if available
+                                if (documentPreview) {
+                                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                                    iframeDoc.open();
+                                    iframeDoc.write(documentPreview);
+                                    iframeDoc.close();
+                                    
+                                    // Add a note about the fallback
+                                    const fallbackNote = document.createElement('div');
+                                    fallbackNote.style.padding = '10px';
+                                    fallbackNote.style.background = '#f8d7da';
+                                    fallbackNote.style.color = '#721c24';
+                                    fallbackNote.style.borderRadius = '4px';
+                                    fallbackNote.style.marginTop = '10px';
+                                    fallbackNote.innerHTML = '<strong>Notice:</strong> The full document URL was invalid. Showing preview instead.';
+                                    documentContainer.insertBefore(fallbackNote, iframe);
+                                } else {
+                                    iframe.srcdoc = '<div style="padding: 20px; text-align: center;"><p>Error loading document. The URL may be invalid or expired.</p><p>Please try converting your PDF again.</p></div>';
+                                }
+                            };
+                            
+                            // Set a timeout to check if the iframe loads
+                            setTimeout(function() {
+                                if (!iframe.contentWindow || !iframe.contentWindow.document.body.innerHTML) {
+                                    iframe.onerror();
+                                }
+                            }, 3000);
+                            
+                            iframe.src = documentUrl;
+                        } catch (e) {
+                            console.error('Error setting document URL:', e);
+                            // Fall back to preview
+                            if (documentPreview) {
+                                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                                iframeDoc.open();
+                                iframeDoc.write(documentPreview);
+                                iframeDoc.close();
+                            } else {
+                                iframe.srcdoc = '<div style="padding: 20px; text-align: center;"><p>Error loading document: ' + e.message + '</p><p>Please try converting your PDF again.</p></div>';
+                            }
+                        }
                     } else if (documentPreview) {
                         // If we have a preview version
                         const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
