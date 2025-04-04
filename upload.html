@@ -175,8 +175,10 @@
                 
                 // Generate HTML content
                 const numPages = pdf.numPages;
-                const fileName = title.replace(/\s+/g, '-').toLowerCase();
+                const sanitizedTitle = title.replace(/[^a-zA-Z0-9-_]/g, '-').replace(/-+/g, '-').toLowerCase();
+                const fileName = sanitizedTitle || 'converted-document';
                 const htmlFileName = `${fileName}.html`;
+                console.log('Using filename:', htmlFileName);
                 let htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -270,30 +272,43 @@
 </body>
 </html>`;
                 
-                // Save the HTML content to localStorage for the static Document Library
+                // Add more debugging info
+                console.log('PDF conversion successful, preparing to save to localStorage');
+                console.log('HTML content length:', htmlContent.length);
+                console.log('Title:', title);
+                console.log('Filename:', htmlFileName);
+                
+                // Store the full document as a blob URL - this is persistent during the session
                 try {
-                    // First, extract just the document metadata and first page for preview
-                    let firstPageContent = htmlContent;
-                    const pageBreakIndex = htmlContent.indexOf('<div class="pdf-page" id="page-2">');
-                    
-                    if (pageBreakIndex > -1) {
-                        firstPageContent = htmlContent.substring(0, pageBreakIndex) + '</div></body></html>';
-                    }
-                    
-                    // Store a smaller preview version
-                    localStorage.setItem('lastConvertedDocument_preview', firstPageContent);
-                    localStorage.setItem('lastConvertedTitle', title);
-                    localStorage.setItem('lastConvertedDate', new Date().toISOString());
-                    
-                    // Store the full document as a blob URL - this is persistent during the session
+                    // Create a blob with the full HTML content
                     const fullDocBlob = new Blob([htmlContent], { type: 'text/html' });
+                    
+                    // Create a URL from the blob
                     const fullDocUrl = URL.createObjectURL(fullDocBlob);
+                    
+                    // Log and store the URL
                     console.log('Created blob URL:', fullDocUrl);
                     localStorage.setItem('lastConvertedDocumentUrl', fullDocUrl);
                     
+                    // Also store the raw HTML content in a separate key for direct access
+                    try {
+                        // Store the first 1MB (or less) of the content as direct HTML
+                        const maxSize = 1024 * 1024; // 1MB limit
+                        const truncatedContent = htmlContent.length > maxSize 
+                            ? htmlContent.substring(0, maxSize) + '<!-- Content truncated for storage limits --></body></html>'
+                            : htmlContent;
+                            
+                        localStorage.setItem('lastConvertedDocumentRaw', truncatedContent);
+                        console.log('Stored raw HTML content in localStorage (possibly truncated)');
+                    } catch (rawStorageError) {
+                        console.warn('Could not store raw HTML content:', rawStorageError);
+                    }
+                    
                     // Also store a message to confirm it worked
                     localStorage.setItem('conversionStatus', 'Successfully converted and saved to document library');
+                    localStorage.setItem('conversionTimestamp', new Date().toISOString());
                     
+                    // After storing the raw HTML content:
                     // Store metadata about the document
                     const docMetadata = {
                         title: title,
@@ -303,8 +318,20 @@
                         hasFullVersion: true
                     };
                     localStorage.setItem('lastConvertedMetadata', JSON.stringify(docMetadata));
-                    
+                    localStorage.setItem('lastConvertedTitle', title);
+                    localStorage.setItem('lastConvertedDate', new Date().toISOString());
+
+                    console.log('Document metadata saved:', docMetadata);
                     console.log('Document saved to localStorage for document library');
+
+                    // Also set up preview content
+                    let firstPageContent = htmlContent;
+                    const pageBreakIndex = htmlContent.indexOf('<div class="pdf-page" id="page-2">');
+                    if (pageBreakIndex > -1) {
+                        firstPageContent = htmlContent.substring(0, pageBreakIndex) + '</div></body></html>';
+                    }
+                    // Store a smaller preview version
+                    localStorage.setItem('lastConvertedDocument_preview', firstPageContent);
                     
                     // Automatically redirect to the document-viewer to show the document
                     try {
@@ -337,58 +364,20 @@
                         alert('Document converted successfully. You can view it in the Document Library.');
                     }
                     
-                } catch (storageError) {
-                    console.error('Error saving to localStorage:', storageError);
-                    // Create a fallback URL for accessing the document
-                    try {
-                        const fallbackBlob = new Blob([htmlContent], { type: 'text/html' });
-                        const fallbackUrl = URL.createObjectURL(fallbackBlob);
-                        localStorage.setItem('lastConvertedDocumentUrl', fallbackUrl);
-                        localStorage.setItem('lastConvertedTitle', title);
-                        localStorage.setItem('lastConvertedDate', new Date().toISOString());
-                        localStorage.setItem('conversionStatus', 'Partial save - document too large for preview');
-                        localStorage.setItem('lastConvertedMetadata', JSON.stringify({
-                            title: title,
-                            fileName: htmlFileName,
-                            date: new Date().toISOString(),
-                            pageCount: numPages || 'Unknown',
-                            hasFullVersion: false,
-                            errorMsg: storageError.message
-                        }));
-                        
-                        alert('Document is large, but has been saved. You can view it in the Document Library.');
-                    } catch (e) {
-                        console.error('Critical error saving document:', e);
-                        alert('Error saving document to library: ' + e.message);
-                    }
+                } catch (blobError) {
+                    console.error('Error creating blob URL:', blobError);
+                    alert('Warning: There was an issue storing the full document. You may only be able to see a preview.');
                 }
-                
-                // Create downloadable HTML file
-                const blob = new Blob([htmlContent], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-                
-                // Create download link
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = htmlFileName;
-                
-                // Trigger download
-                a.click();
                 
                 // Save to website using fetch API
                 try {
                     await saveToWebsite(htmlFileName, htmlContent, title);
-                    showStatus('PDF converted successfully! The HTML file has been downloaded and added to the Document Library.', 'success');
+                    console.log('PDF converted successfully, conversion available in Document Library');
+                    showStatus('PDF converted successfully! View your converted document in the Document Library.', 'success');
                 } catch (saveError) {
                     console.error('Error saving to website:', saveError);
                     showStatus('PDF converted successfully! The HTML file has been downloaded but could not be saved to the website.', 'success');
                 }
-                
-                // Clean up
-                URL.revokeObjectURL(url);
-                
-                // Open the HTML in a new tab
-                window.open(url, '_blank');
                 
             } catch (error) {
                 console.error('Error converting PDF:', error);
