@@ -260,6 +260,11 @@
 </body>
 </html>`;
                 
+                // Save the HTML content to localStorage for the static Document Library
+                localStorage.setItem('lastConvertedDocument', htmlContent);
+                localStorage.setItem('lastConvertedTitle', title);
+                localStorage.setItem('lastConvertedDate', new Date().toISOString());
+                
                 // Create downloadable HTML file
                 const blob = new Blob([htmlContent], { type: 'text/html' });
                 const url = URL.createObjectURL(blob);
@@ -275,7 +280,7 @@
                 // Save to website using fetch API
                 try {
                     await saveToWebsite(htmlFileName, htmlContent, title);
-                    showStatus('PDF converted successfully! The document has been added to the website and downloaded to your device.', 'success');
+                    showStatus('PDF converted successfully! The HTML file has been downloaded and added to the Document Library.', 'success');
                 } catch (saveError) {
                     console.error('Error saving to website:', saveError);
                     showStatus('PDF converted successfully! The HTML file has been downloaded but could not be saved to the website.', 'success');
