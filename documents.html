@@ -210,7 +210,7 @@
                 </div>
                 <div class="document-actions">
                     <a href="index.html" target="_blank">View</a>
-                    <a href="#" onclick="alert('Download functionality requires server-side code.')">Download</a>
+                    <a href="index.html" download="irreducible.html">Download</a>
                 </div>
             </li>
             
@@ -266,8 +266,32 @@
                 console.log('Viewing document, URL available:', !!documentUrl);
                 console.log('Raw content available:', !!documentRaw);
                 
-                // Try to get the filename for the document
+                // Get document content from either source
+                let documentContent = '';
                 let filename = 'converted-document.html';
+                
+                if (documentRaw) {
+                    // Use the raw content if available
+                    documentContent = documentRaw;
+                } else if (documentUrl) {
+                    // Try to fetch content from the URL (this is async but we'll handle it)
+                    fetch(documentUrl)
+                        .then(response => response.text())
+                        .then(content => {
+                            createAndOpenHtmlFile(content, filename);
+                        })
+                        .catch(error => {
+                            console.error('Error fetching document content:', error);
+                            alert('Error loading document. Please try converting it again.');
+                        });
+                    return; // Return early as we're handling this asynchronously
+                } else {
+                    // No content available
+                    alert('No document content available. Please convert a PDF first.');
+                    return;
+                }
+                
+                // Try to get the filename from metadata
                 if (metadataStr) {
                     try {
                         const metadata = JSON.parse(metadataStr);
@@ -282,22 +306,12 @@
                     }
                 }
                 
-                // Directly open the document URL if available
-                if (documentUrl) {
-                    // Open the document URL directly
-                    window.open(documentUrl, '_blank');
-                } else if (documentRaw) {
-                    // If we have raw content but no URL, create a blob and open it
-                    const blob = new Blob([documentRaw], { type: 'text/html' });
-                    const url = URL.createObjectURL(blob);
-                    window.open(url, '_blank');
-                } else {
-                    // Fallback to document viewer
-                    const timestamp = new Date().getTime();
-                    window.open(`document-viewer.html?t=${timestamp}`, '_blank');
+                // Create and open the HTML file with the content
+                if (documentContent) {
+                    createAndOpenHtmlFile(documentContent, filename);
                 }
                 
-                // Update the document title if we have metadata
+                // Update the document information in the list
                 updateDocumentInfo(metadataStr, viewConvertedLink);
             });
             
@@ -478,6 +492,16 @@
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
             }, 100);
+        }
+        
+        // Add a function to create and open an HTML file
+        function createAndOpenHtmlFile(content, filename) {
+            // Create a blob with the HTML content
+            const blob = new Blob([content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            
+            // Open the HTML file in a new tab
+            window.open(url, '_blank');
         }
     </script>
 
