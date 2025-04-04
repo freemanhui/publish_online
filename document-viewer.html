@@ -67,10 +67,19 @@
     <script>
         // When the page loads, automatically load the document
         window.addEventListener('DOMContentLoaded', function() {
-            // Auto-load the document
+            // Auto-load the document after a short delay
             setTimeout(function() {
                 document.getElementById('load-document').click();
             }, 500);
+            
+            // If URL has a timestamp parameter, use it to bust cache
+            if (window.location.search.includes('t=')) {
+                console.log('Using cache-busting timestamp from URL');
+                // Force reload all resources
+                if (window.location.href.includes('?')) {
+                    localStorage.setItem('lastPageLoad', new Date().toISOString());
+                }
+            }
         });
     </script>
 </head>
@@ -239,27 +248,39 @@
                     
                     // Function to display preview in iframe
                     function displayPreviewInIframe() {
-                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                        iframeDoc.open();
-                        iframeDoc.write(documentPreview);
-                        iframeDoc.close();
-                        
-                        // Add a note that this is just a preview
-                        const previewNote = document.createElement('div');
-                        previewNote.className = 'preview-note';
-                        previewNote.style.padding = '10px';
-                        previewNote.style.background = '#fff3cd';
-                        previewNote.style.color = '#856404';
-                        previewNote.style.borderRadius = '4px';
-                        previewNote.style.marginTop = '10px'; 
-                        previewNote.style.border = '1px solid #ffeeba';
-                        previewNote.innerHTML = '<strong>Note:</strong> This is showing a preview version. For best results, access your document directly after converting.';
-                        documentContainer.insertBefore(previewNote, iframe);
-                        
-                        statusDiv.style.background = '#fff3cd';
-                        statusDiv.style.color = '#856404';
-                        statusDiv.style.border = '1px solid #ffeeba';
-                        statusDiv.innerHTML = '<strong>Notice:</strong> Showing preview version of the document.';
+                        try {
+                            console.log('Displaying preview version of document');
+                            
+                            // First check if we have a preview
+                            if (!documentPreview || documentPreview.length < 100) {
+                                throw new Error('Preview content is invalid or too short');
+                            }
+                            
+                            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                            iframeDoc.open();
+                            iframeDoc.write(documentPreview);
+                            iframeDoc.close();
+                            
+                            // Add a note that this is just a preview
+                            const previewNote = document.createElement('div');
+                            previewNote.className = 'preview-note';
+                            previewNote.style.padding = '10px';
+                            previewNote.style.background = '#fff3cd';
+                            previewNote.style.color = '#856404';
+                            previewNote.style.borderRadius = '4px';
+                            previewNote.style.marginTop = '10px'; 
+                            previewNote.style.border = '1px solid #ffeeba';
+                            previewNote.innerHTML = '<strong>Note:</strong> This is showing a preview version. For best results, convert your document again if it appears incomplete.';
+                            documentContainer.insertBefore(previewNote, iframe);
+                            
+                            statusDiv.style.background = '#fff3cd';
+                            statusDiv.style.color = '#856404';
+                            statusDiv.style.border = '1px solid #ffeeba';
+                            statusDiv.innerHTML = '<strong>Notice:</strong> Showing preview version of the document. <a href="upload.html" style="color: #856404; text-decoration: underline; font-weight: bold;">Convert a new document</a>';
+                        } catch (e) {
+                            console.error('Error displaying preview:', e);
+                            handleNoDocumentAvailable();
+                        }
                     }
                     
                     // Update button text
@@ -276,6 +297,38 @@
                 }
             });
         });
+
+        function handleNoDocumentAvailable() {
+            statusDiv.style.background = '#f8d7da';
+            statusDiv.style.color = '#721c24';
+            statusDiv.style.border = '1px solid #f5c6cb';
+            statusDiv.innerHTML = '<strong>Error:</strong> No document found or document data is invalid.';
+            
+            documentContainer.innerHTML = '';
+            documentContainer.appendChild(statusDiv);
+            
+            const errorMsg = document.createElement('div');
+            errorMsg.style.textAlign = 'center';
+            errorMsg.style.marginTop = '30px';
+            errorMsg.innerHTML = `
+                <p>No valid document found in browser storage.</p>
+                <p>This might be because:</p>
+                <ul style="display: inline-block; text-align: left;">
+                    <li>You haven't converted a PDF yet</li>
+                    <li>Your browser storage was cleared</li>
+                    <li>The document data was corrupted</li>
+                </ul>
+                <p><a href="upload.html" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px;">Convert a PDF Now</a></p>
+            `;
+            documentContainer.appendChild(errorMsg);
+            
+            // Auto-redirect to converter after 5 seconds if no document found
+            setTimeout(function() {
+                if (confirm('No document found. Would you like to go to the PDF converter?')) {
+                    window.location.href = 'upload.html';
+                }
+            }, 5000);
+        }
     </script>
 
     <!-- Force refresh: ${new Date().toISOString()} -->

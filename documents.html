@@ -263,8 +263,11 @@
                 console.log('Viewing document, URL available:', !!documentUrl);
                 console.log('Preview available:', !!documentPreview);
                 
+                // Add cache-busting parameter
+                const timestamp = new Date().getTime();
+                
                 // Prefer using the document viewer which has better error handling
-                window.open('document-viewer.html', '_blank');
+                window.open(`document-viewer.html?t=${timestamp}`, '_blank');
                 
                 // Update the document title if we have metadata
                 if (metadataStr) {
@@ -291,6 +294,15 @@
                     }
                 }
             });
+            
+            // Add cache-busting to the "View in Viewer" link
+            const viewerLinks = document.querySelectorAll('a[href="document-viewer.html"]');
+            viewerLinks.forEach(link => {
+                link.href = `document-viewer.html?t=${new Date().getTime()}`;
+            });
+            
+            // Check if we need to update document info from localStorage
+            updateConvertedDocumentInfo();
         });
         
         /**
@@ -317,6 +329,38 @@
                     item.style.display = 'none';
                 }
             });
+        }
+        
+        // Also update the static "View in Viewer" link to include cache-busting:
+        function updateConvertedDocumentInfo() {
+            // Check if we need to update document info from localStorage
+            const documentUrl = localStorage.getItem('lastConvertedDocumentUrl');
+            const documentPreview = localStorage.getItem('lastConvertedDocument_preview');
+            const metadataStr = localStorage.getItem('lastConvertedMetadata');
+            
+            if (documentUrl && documentPreview && metadataStr) {
+                try {
+                    const metadata = JSON.parse(metadataStr);
+                    const docItem = document.querySelector('.document-item');
+                    const titleElem = docItem.querySelector('.document-title');
+                    const metaElem = docItem.querySelector('.document-meta');
+                    
+                    if (titleElem && metadata.title) {
+                        titleElem.textContent = metadata.title;
+                    }
+                    
+                    if (metaElem && metadata.date) {
+                        const date = new Date(metadata.date);
+                        let pageInfo = '';
+                        if (metadata.pageCount && metadata.pageCount !== 'Unknown') {
+                            pageInfo = ` - ${metadata.pageCount} pages`;
+                        }
+                        metaElem.textContent = `Converted on ${date.toLocaleDateString()}${pageInfo}`;
+                    }
+                } catch (e) {
+                    console.error('Error updating document info:', e);
+                }
+            }
         }
     </script>
 

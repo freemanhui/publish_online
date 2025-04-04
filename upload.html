@@ -307,8 +307,34 @@
                     console.log('Document saved to localStorage for document library');
                     
                     // Automatically redirect to the document-viewer to show the document
-                    if (confirm('Document converted successfully! View it in the document viewer?')) {
-                        window.open('document-viewer.html', '_blank');
+                    try {
+                        // First check if we're on GitHub Pages
+                        const isGitHubPages = window.location.hostname.includes('github.io');
+                        
+                        // Different strategy based on environment
+                        if (isGitHubPages) {
+                            // On GitHub Pages, redirect directly to the document viewer
+                            const viewerUrl = 'document-viewer.html?t=' + new Date().getTime();
+                            
+                            if (confirm('Document converted successfully! View it in the document viewer?')) {
+                                window.open(viewerUrl, '_blank');
+                            } else {
+                                // If they decline, offer to go to the document library
+                                if (confirm('Would you like to see your document in the Document Library instead?')) {
+                                    window.location.href = 'documents.html?t=' + new Date().getTime();
+                                }
+                            }
+                        } else {
+                            // On a server environment, offer download option
+                            if (confirm('Document converted successfully! View it in the document viewer?')) {
+                                window.open('document-viewer.html', '_blank');
+                            }
+                        }
+                        
+                    } catch (e) {
+                        console.error('Error in document viewer redirect:', e);
+                        // Fallback to simple alert if there's any error
+                        alert('Document converted successfully. You can view it in the Document Library.');
                     }
                     
                 } catch (storageError) {
@@ -377,6 +403,24 @@
          * Saves the converted HTML file to the website
          */
         async function saveToWebsite(fileName, content, title) {
+            // Check if we're on GitHub Pages (no server available)
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            
+            if (isGitHubPages) {
+                console.log('Running on GitHub Pages - skipping server-side save');
+                
+                // In GitHub Pages environment, we can only use client storage
+                // Create a special marker to show we're on GitHub Pages
+                localStorage.setItem('isGitHubPages', 'true');
+                localStorage.setItem('lastSaveAttempt', new Date().toISOString());
+                
+                // Return successful result so the conversion doesn't error out
+                return {
+                    success: true,
+                    message: 'Document saved to browser storage for GitHub Pages environment'
+                };
+            }
+            
             // Create metadata for the document
             const metadata = {
                 title: title,
