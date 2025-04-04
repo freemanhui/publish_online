@@ -214,17 +214,17 @@
                 </div>
             </li>
             
-            <!-- Add your converted document here -->
-            <li class="document-item">
+            <!-- Dynamic document item for latest conversion -->
+            <li class="document-item" id="latest-conversion">
                 <div class="document-info">
-                    <h3 class="document-title">Your Converted Document</h3>
-                    <p class="document-meta">
+                    <h3 class="document-title" id="latest-doc-title">Your Converted Document</h3>
+                    <p class="document-meta" id="latest-doc-meta">
                         Recent PDF conversion
                     </p>
                 </div>
                 <div class="document-actions">
                     <a href="#" id="view-converted-doc">View</a>
-                    <a href="#" onclick="alert('Please use the PDF Converter to create a new conversion.')">Download</a>
+                    <a href="#" id="download-converted-doc">Download</a>
                 </div>
             </li>
         </ul>
@@ -260,43 +260,99 @@
                 
                 // Check local storage for last converted document
                 const documentUrl = localStorage.getItem('lastConvertedDocumentUrl');
-                const documentPreview = localStorage.getItem('lastConvertedDocument_preview');
+                const documentRaw = localStorage.getItem('lastConvertedDocumentRaw');
                 const metadataStr = localStorage.getItem('lastConvertedMetadata');
                 
                 console.log('Viewing document, URL available:', !!documentUrl);
-                console.log('Preview available:', !!documentPreview);
+                console.log('Raw content available:', !!documentRaw);
                 
-                // Add cache-busting parameter
-                const timestamp = new Date().getTime();
-                
-                // Prefer using the document viewer which has better error handling
-                window.open(`document-viewer.html?t=${timestamp}`, '_blank');
-                
-                // Update the document title if we have metadata
+                // Try to get the filename for the document
+                let filename = 'converted-document.html';
                 if (metadataStr) {
                     try {
                         const metadata = JSON.parse(metadataStr);
-                        const docItem = viewConvertedLink.closest('.document-item');
-                        const titleElem = docItem.querySelector('.document-title');
-                        const metaElem = docItem.querySelector('.document-meta');
-                        
-                        if (titleElem && metadata.title) {
-                            titleElem.textContent = metadata.title;
-                        }
-                        
-                        if (metaElem && metadata.date) {
-                            const date = new Date(metadata.date);
-                            let pageInfo = '';
-                            if (metadata.pageCount && metadata.pageCount !== 'Unknown') {
-                                pageInfo = ` - ${metadata.pageCount} pages`;
-                            }
-                            metaElem.textContent = `Converted on ${date.toLocaleDateString()}${pageInfo}`;
+                        if (metadata.fileName) {
+                            filename = metadata.fileName;
+                        } else if (metadata.title) {
+                            // Create filename from title
+                            filename = metadata.title.replace(/[^a-zA-Z0-9-_]/g, '-').replace(/-+/g, '-').toLowerCase() + '.html';
                         }
                     } catch (e) {
-                        console.error('Error updating document info:', e);
+                        console.error('Error parsing metadata:', e);
                     }
                 }
+                
+                // Directly open the document URL if available
+                if (documentUrl) {
+                    // Open the document URL directly
+                    window.open(documentUrl, '_blank');
+                } else if (documentRaw) {
+                    // If we have raw content but no URL, create a blob and open it
+                    const blob = new Blob([documentRaw], { type: 'text/html' });
+                    const url = URL.createObjectURL(blob);
+                    window.open(url, '_blank');
+                } else {
+                    // Fallback to document viewer
+                    const timestamp = new Date().getTime();
+                    window.open(`document-viewer.html?t=${timestamp}`, '_blank');
+                }
+                
+                // Update the document title if we have metadata
+                updateDocumentInfo(metadataStr, viewConvertedLink);
             });
+            
+            // Set up the download button
+            const downloadButton = document.getElementById('download-converted-doc');
+            if (downloadButton) {
+                downloadButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Check local storage for document content
+                    const documentUrl = localStorage.getItem('lastConvertedDocumentUrl');
+                    const documentRaw = localStorage.getItem('lastConvertedDocumentRaw');
+                    const metadataStr = localStorage.getItem('lastConvertedMetadata');
+                    
+                    // Try to get the filename
+                    let filename = 'converted-document.html';
+                    if (metadataStr) {
+                        try {
+                            const metadata = JSON.parse(metadataStr);
+                            if (metadata.fileName) {
+                                filename = metadata.fileName;
+                            } else if (metadata.title) {
+                                // Create filename from title
+                                filename = metadata.title.replace(/[^a-zA-Z0-9-_]/g, '-').replace(/-+/g, '-').toLowerCase() + '.html';
+                            }
+                        } catch (e) {
+                            console.error('Error parsing metadata:', e);
+                        }
+                    }
+                    
+                    // Create the download
+                    if (documentUrl) {
+                        // For blob URLs, we need to fetch the content first
+                        fetch(documentUrl)
+                            .then(response => response.text())
+                            .then(content => {
+                                triggerDownload(content, filename);
+                            })
+                            .catch(error => {
+                                console.error('Error fetching content:', error);
+                                // Try the raw content as fallback
+                                if (documentRaw) {
+                                    triggerDownload(documentRaw, filename);
+                                } else {
+                                    alert('Unable to download the document. Please try converting it again.');
+                                }
+                            });
+                    } else if (documentRaw) {
+                        // Use the raw content directly
+                        triggerDownload(documentRaw, filename);
+                    } else {
+                        alert('No document content available. Please convert a PDF first.');
+                    }
+                });
+            }
             
             // Add cache-busting to the "View in Viewer" link
             const viewerLinks = document.querySelectorAll('a[href="document-viewer.html"]');
@@ -304,7 +360,7 @@
                 link.href = `document-viewer.html?t=${new Date().getTime()}`;
             });
             
-            // Check if we need to update document info from localStorage
+            // Update document information from localStorage
             updateConvertedDocumentInfo();
         });
         
@@ -334,17 +390,56 @@
             });
         }
         
-        // Also update the static "View in Viewer" link to include cache-busting:
+        // Update document information when the page loads
         function updateConvertedDocumentInfo() {
-            // Check if we need to update document info from localStorage
-            const documentUrl = localStorage.getItem('lastConvertedDocumentUrl');
-            const documentPreview = localStorage.getItem('lastConvertedDocument_preview');
+            // Get document metadata from localStorage
             const metadataStr = localStorage.getItem('lastConvertedMetadata');
+            const documentTitle = localStorage.getItem('lastConvertedTitle');
+            const documentDate = localStorage.getItem('lastConvertedDate');
             
-            if (documentUrl && documentPreview && metadataStr) {
+            // If we have metadata, update the document title and info
+            if (metadataStr) {
                 try {
                     const metadata = JSON.parse(metadataStr);
-                    const docItem = document.querySelector('.document-item');
+                    const titleElement = document.getElementById('latest-doc-title');
+                    const metaElement = document.getElementById('latest-doc-meta');
+                    
+                    // Update the document title with actual name
+                    if (titleElement && metadata.title) {
+                        titleElement.textContent = metadata.title;
+                    } else if (titleElement && documentTitle) {
+                        titleElement.textContent = documentTitle;
+                    }
+                    
+                    // Update the metadata with date and page count
+                    if (metaElement) {
+                        let metaText = '';
+                        if (metadata.date) {
+                            const date = new Date(metadata.date);
+                            metaText += `Converted on ${date.toLocaleDateString()} `;
+                        } else if (documentDate) {
+                            const date = new Date(documentDate);
+                            metaText += `Converted on ${date.toLocaleDateString()} `;
+                        }
+                        
+                        if (metadata.pageCount && metadata.pageCount !== 'Unknown') {
+                            metaText += `- ${metadata.pageCount} pages`;
+                        }
+                        
+                        metaElement.textContent = metaText || 'Recent PDF conversion';
+                    }
+                } catch (e) {
+                    console.error('Error parsing document metadata:', e);
+                }
+            }
+        }
+        
+        // Create a function to update document info from metadata
+        function updateDocumentInfo(metadataStr, linkElement) {
+            if (metadataStr) {
+                try {
+                    const metadata = JSON.parse(metadataStr);
+                    const docItem = linkElement.closest('.document-item');
                     const titleElem = docItem.querySelector('.document-title');
                     const metaElem = docItem.querySelector('.document-meta');
                     
@@ -364,6 +459,25 @@
                     console.error('Error updating document info:', e);
                 }
             }
+        }
+        
+        // Add a helper function to trigger downloads
+        function triggerDownload(content, filename) {
+            // Create blob and download link
+            const blob = new Blob([content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            
+            // Clean up
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 100);
         }
     </script>
 

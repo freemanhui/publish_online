@@ -308,15 +308,36 @@
                     localStorage.setItem('conversionStatus', 'Successfully converted and saved to document library');
                     localStorage.setItem('conversionTimestamp', new Date().toISOString());
                     
-                    // After storing the raw HTML content:
+                    // Create a sanitized title that's user-friendly
+                    let displayTitle = title || 'Converted Document';
+                    let cleanFileName = sanitizedTitle || 'converted-document';
+
+                    // If title is from the input field but file has a name, use it as additional info
+                    if (!title && file.name) {
+                        // Remove the .pdf extension and convert to title case
+                        displayTitle = file.name.replace('.pdf', '').replace(/-/g, ' ')
+                            .replace(/\b\w/g, l => l.toUpperCase());
+                        
+                        // Also use for the filename if needed
+                        if (!sanitizedTitle) {
+                            cleanFileName = file.name.replace('.pdf', '').toLowerCase()
+                                .replace(/[^a-zA-Z0-9-_]/g, '-').replace(/-+/g, '-');
+                        }
+                    }
+
                     // Store metadata about the document
                     const docMetadata = {
-                        title: title,
-                        fileName: htmlFileName,
+                        title: displayTitle,
+                        fileName: `${cleanFileName}.html`,
                         date: new Date().toISOString(),
                         pageCount: numPages || 'Unknown',
-                        hasFullVersion: true
+                        hasFullVersion: true,
+                        originalFileName: file.name
                     };
+
+                    console.log('Using document title:', displayTitle);
+                    console.log('Using filename:', docMetadata.fileName);
+                    
                     localStorage.setItem('lastConvertedMetadata', JSON.stringify(docMetadata));
                     localStorage.setItem('lastConvertedTitle', title);
                     localStorage.setItem('lastConvertedDate', new Date().toISOString());
