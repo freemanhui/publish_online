@@ -1,0 +1,162 @@
+/* PDF Viewer Styles */
+body {
+    font-family: 'Times New Roman', Times, serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.nav {
+    background-color: #fff;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav a {
+    margin: 0 10px;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.nav a:hover {
+    text-decoration: underline;
+}
+
+.pdf-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+h1 {
+    font-size: 28px;
+    text-align: center;
+    margin: 20px 0 40px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.pdf-page {
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px dashed #ddd;
+    position: relative;
+}
+
+.page-number {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0,0,0,0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.page-image {
+    width: 100%;
+    height: auto;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    margin-bottom: 20px;
+}
+
+.page-text {
+    position: relative;
+    min-height: 400px;
+    margin-top: 20px;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/* For selectable text overlay */
+.page-text span {
+    position: absolute;
+    cursor: text;
+    color: transparent;
+    z-index: 10;
+}
+
+/* For highlighting selected text */
+::selection {
+    background: rgba(0, 123, 255, 0.3);
+    color: #000;
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+    .pdf-container {
+        padding: 10px;
+    }
+    
+    h1 {
+        font-size: 24px;
+    }
+    
+    .page-text {
+        font-size: 14px;
+    }
+}
+
+/* Print styles */
+@media print {
+    .nav {
+        display: none;
+    }
+    
+    .pdf-container {
+        box-shadow: none;
+        max-width: 100%;
+    }
+    
+    .page-number {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background-color: transparent;
+        color: #666;
+    }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #222;
+        color: #eee;
+    }
+    
+    .pdf-container,
+    .nav {
+        background-color: #333;
+    }
+    
+    h1 {
+        border-bottom-color: #444;
+    }
+    
+    .pdf-page {
+        border-bottom-color: #444;
+    }
+    
+    .nav a {
+        color: #5ea8ff;
+    }
+    
+    .page-image {
+        box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+    
+    ::selection {
+        background: rgba(66, 135, 245, 0.5);
+        color: #fff;
+    }
+} 
