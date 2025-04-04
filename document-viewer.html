@@ -63,6 +63,47 @@
         .button:hover {
             background-color: #45a049;
         }
+        .doc-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            word-break: break-word;
+        }
+        .metadata-container {
+            background: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .iframe-container {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 20px;
+            background: white;
+        }
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        .action-buttons a, .action-buttons button {
+            flex: 1 0 auto;
+            min-width: 120px;
+            max-width: 200px;
+            text-align: center;
+        }
+        @media print {
+            .nav, .container > p, .button, .action-buttons, .metadata-container {
+                display: none;
+            }
+            .iframe-container {
+                border: none;
+            }
+        }
     </style>
     <script>
         // When the page loads, automatically load the document
@@ -80,6 +121,53 @@
                     localStorage.setItem('lastPageLoad', new Date().toISOString());
                 }
             }
+
+            // Add handler for the standalone HTML button
+            const standaloneButton = document.getElementById('open-standalone');
+            if (standaloneButton) {
+                standaloneButton.addEventListener('click', function() {
+                    // Get document content
+                    const documentRaw = localStorage.getItem('lastConvertedDocumentRaw');
+                    const documentUrl = localStorage.getItem('lastConvertedDocumentUrl');
+                    
+                    // Try to determine a filename
+                    let filename = 'converted-document.html';
+                    const metadataStr = localStorage.getItem('lastConvertedMetadata');
+                    if (metadataStr) {
+                        try {
+                            const metadata = JSON.parse(metadataStr);
+                            if (metadata.fileName) {
+                                filename = metadata.fileName;
+                            }
+                        } catch (e) {
+                            console.error('Error parsing metadata:', e);
+                        }
+                    }
+                    
+                    // Try to open as standalone HTML
+                    if (documentRaw) {
+                        // If we have the raw content, create a blob with it
+                        const blob = new Blob([documentRaw], { type: 'text/html' });
+                        const url = URL.createObjectURL(blob);
+                        window.open(url, '_blank');
+                    } else if (documentUrl) {
+                        // If we only have the URL, try to fetch and open it
+                        fetch(documentUrl)
+                            .then(response => response.text())
+                            .then(content => {
+                                const blob = new Blob([content], { type: 'text/html' });
+                                const url = URL.createObjectURL(blob);
+                                window.open(url, '_blank');
+                            })
+                            .catch(error => {
+                                console.error('Error fetching document content:', error);
+                                alert('Error loading document. Please try converting it again.');
+                            });
+                    } else {
+                        alert('No document content available. Please convert a PDF first.');
+                    }
+                });
+            }
         });
     </script>
 </head>
@@ -96,6 +184,12 @@
 
     <h1>Document Viewer</h1>
     
+    <div style="text-align: center; margin: 20px 0;">
+        <button id="open-standalone" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer;">
+            Open as Standalone HTML
+        </button>
+    </div>
+
     <div class="container">
         <p>This page allows you to view your last converted document.</p>
         <button id="load-document" class="button">Load Converted Document</button>
@@ -108,11 +202,22 @@
             const documentContainer = document.getElementById('document-container');
             
             loadButton.addEventListener('click', function() {
+                // Check for additional document sources
+                console.log('Document loading triggered');
+                console.log('LocalStorage items:', Object.keys(localStorage));
+                
                 // Get document metadata
                 const metadataStr = localStorage.getItem('lastConvertedMetadata');
                 const documentUrl = localStorage.getItem('lastConvertedDocumentUrl');
                 const documentPreview = localStorage.getItem('lastConvertedDocument_preview');
+                const documentRaw = localStorage.getItem('lastConvertedDocumentRaw');
                 const documentTitle = localStorage.getItem('lastConvertedTitle');
+                
+                // Log all available sources
+                console.log('Document URL available:', !!documentUrl);
+                console.log('Preview available:', !!documentPreview);
+                console.log('Raw content available:', !!documentRaw);
+                console.log('Metadata available:', !!metadataStr);
                 
                 console.log('Attempting to load document');
                 console.log('Document URL:', documentUrl);
@@ -126,7 +231,7 @@
                 statusDiv.style.textAlign = 'left';
                 
                 // Check if we have document information
-                if (documentUrl || documentPreview) {
+                if (documentUrl || documentPreview || documentRaw) {
                     documentContainer.innerHTML = '<div class="loading">Loading document...</div>';
                     
                     // Create metadata display
@@ -134,24 +239,28 @@
                     if (metadataStr) {
                         try {
                             const metadata = JSON.parse(metadataStr);
+                            const docTitle = metadata.title || documentTitle || 'Untitled Document';
+                            const docDate = new Date(metadata.date).toLocaleString();
+                            const docPages = metadata.pageCount || 'Unknown';
+                            const docFilename = metadata.fileName || 'unknown-file.html';
+                            
                             metadataDisplay = `
-                                <div class="metadata" style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 4px; border: 1px solid #ddd;">
-                                    <h3 style="margin-top: 0;">Document Details</h3>
-                                    <p><strong>Title:</strong> ${metadata.title || documentTitle || 'Untitled Document'}</p>
-                                    <p><strong>Date:</strong> ${new Date(metadata.date).toLocaleString()}</p>
-                                    <p><strong>Pages:</strong> ${metadata.pageCount || 'Unknown'}</p>
+                                <div class="metadata-container">
+                                    <div class="doc-title">${docTitle}</div>
+                                    <div><strong>Filename:</strong> ${docFilename}</div>
+                                    <div><strong>Date:</strong> ${docDate}</div>
+                                    <div><strong>Pages:</strong> ${docPages}</div>
                                 </div>
                             `;
                             
                             // Update page title with document title
-                            document.title = metadata.title || documentTitle || 'Document Viewer';
+                            document.title = `${docTitle} - Document Viewer`;
                         } catch (e) {
                             console.error('Error parsing metadata:', e);
                             metadataDisplay = `
-                                <div class="metadata" style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 4px; border: 1px solid #ddd;">
-                                    <h3 style="margin-top: 0;">Document Details</h3>
-                                    <p><strong>Title:</strong> ${documentTitle || 'Untitled Document'}</p>
-                                    <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+                                <div class="metadata-container">
+                                    <div class="doc-title">${documentTitle || 'Untitled Document'}</div>
+                                    <div><strong>Date:</strong> ${new Date().toLocaleString()}</div>
                                 </div>
                             `;
                         }
@@ -164,131 +273,148 @@
                     statusDiv.innerHTML = '<strong>Status:</strong> Document loaded successfully. ' + 
                                         (localStorage.getItem('conversionStatus') || '');
                     
+                    // Create an iframe container for better styling
+                    const iframeContainer = document.createElement('div');
+                    iframeContainer.className = 'iframe-container';
+
                     // Create an iframe to display the document
-                    const iframe = document.createElement('iframe');
-                    iframe.style.width = '100%';
-                    iframe.style.height = '600px';
-                    iframe.style.border = '1px solid #ddd';
-                    iframe.style.borderRadius = '4px';
-                    
-                    // Clear container and add iframe
+                    const newFrame = document.createElement('iframe');
+                    newFrame.style.width = '100%';
+                    newFrame.style.height = '600px';
+                    newFrame.style.border = 'none';
+                    newFrame.setAttribute('title', documentTitle || 'Converted Document');
+                    newFrame.setAttribute('allowfullscreen', 'true');
+                    newFrame.setAttribute('loading', 'eager');
+
+                    // Add the iframe to the container
+                    iframeContainer.appendChild(newFrame);
+
+                    // Clear container and add metadata and iframe container
                     documentContainer.innerHTML = metadataDisplay;
                     documentContainer.appendChild(statusDiv);
-                    documentContainer.appendChild(iframe);
+                    documentContainer.appendChild(iframeContainer);
+
+                    // Open the URL in the iframe directly - this is more reliable for blob URLs
+                    newFrame.src = documentUrl;
                     
-                    // Count successful loads
-                    let loadSuccess = false;
-                    
-                    if (documentUrl) {
+                    // If the URL starts with blob:, add special handling for it
+                    if (documentUrl.startsWith('blob:')) {
+                        console.log('Using blob URL loading method');
+                        
+                        // Add a message about blob URLs
+                        statusDiv.innerHTML += '<br>Using blob URL to display document.';
+                        
+                        // Get the actual content directly as a fallback
                         try {
-                            console.log('Attempting to load document from URL:', documentUrl);
-                            
-                            // Add error handling for the iframe
-                            iframe.onerror = function() {
-                                console.error('Error loading document URL');
-                                handleDocumentLoadError();
-                            };
-                            
-                            // Set a timeout to check if the iframe loads
-                            setTimeout(function() {
-                                if (!loadSuccess) {
-                                    console.log('Timeout - falling back to alternative loading method');
-                                    handleDocumentLoadError();
+                            fetch(documentUrl)
+                                .then(response => response.text())
+                                .then(content => {
+                                    // If the iframe is empty after 2 seconds, try direct content insertion
+                                    setTimeout(() => {
+                                        if (!loadSuccess) {
+                                            console.log('Fallback to direct content insertion');
+                                            const iframeDoc = newFrame.contentDocument || newFrame.contentWindow.document;
+                                            iframeDoc.open();
+                                            iframeDoc.write(content);
+                                            iframeDoc.close();
+                                            loadSuccess = true;
+                                        }
+                                    }, 2000);
+                                })
+                                .catch(e => {
+                                    console.error('Error fetching blob content:', e);
+                                });
+                        } catch (fetchError) {
+                            console.error('Error in fetch operation for blob:', fetchError);
+                        }
+                    }
+                    
+                    // Add alternative viewing buttons
+                    const viewOptions = document.createElement('div');
+                    viewOptions.className = 'action-buttons';
+                    viewOptions.style.marginTop = '15px';
+                    viewOptions.style.textAlign = 'center';
+                    viewOptions.innerHTML = `
+                        <p>If the document isn't displaying correctly, try one of these options:</p>
+                        <a href="${documentUrl}" target="_blank" style="display: inline-block; margin: 5px; padding: 8px 15px; background: #007bff; color: white; text-decoration: none; border-radius: 4px;">Open in New Tab</a>
+                        <a href="${documentUrl}" download="${documentTitle || 'document'}.html" style="display: inline-block; margin: 5px; padding: 8px 15px; background: #28a745; color: white; text-decoration: none; border-radius: 4px;">Download HTML</a>
+                        <button id="view-preview" style="display: inline-block; margin: 5px; padding: 8px 15px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">View Preview</button>
+                        <button id="view-raw" style="display: inline-block; margin: 5px; padding: 8px 15px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">Use Raw Content</button>
+                        <button id="print-doc" style="display: inline-block; margin: 5px; padding: 8px 15px; background: #fd7e14; color: white; border: none; border-radius: 4px; cursor: pointer;">Print Document</button>
+                    `;
+                    documentContainer.appendChild(viewOptions);
+                    
+                    // Add event listener for the preview button
+                    setTimeout(() => {
+                        const previewButton = document.getElementById('view-preview');
+                        if (previewButton) {
+                            previewButton.addEventListener('click', function() {
+                                if (documentPreview) {
+                                    displayPreviewInIframe();
+                                } else {
+                                    alert('No preview version available. Please try converting the document again.');
                                 }
-                            }, 3000);
+                            });
+                        }
+                    }, 100);
+                    
+                    // Add event listener for the raw content button
+                    setTimeout(() => {
+                        const rawButton = document.getElementById('view-raw');
+                        if (rawButton) {
+                            rawButton.addEventListener('click', function() {
+                                if (documentRaw) {
+                                    displayRawContent();
+                                } else {
+                                    alert('No raw content available. Please try converting the document again.');
+                                }
+                            });
+                        }
+                    }, 100);
+                    
+                    // Add the print functionality
+                    setTimeout(() => {
+                        const printButton = document.getElementById('print-doc');
+                        if (printButton) {
+                            printButton.addEventListener('click', function() {
+                                window.print();
+                            });
+                        }
+                    }, 100);
+                    
+                    // Monitor when the iframe loads
+                    newFrame.onload = function() {
+                        loadSuccess = true;
+                        console.log('Document loaded successfully in iframe');
+                        
+                        // Try to access iframe content to check if it loaded correctly
+                        try {
+                            // If we can access the document body, it loaded correctly
+                            const iframeContent = newFrame.contentDocument || newFrame.contentWindow.document;
+                            const bodyContent = iframeContent.body.innerHTML;
                             
-                            // Try to set the source directly
-                            iframe.src = documentUrl;
-                            
-                            // Monitor when the iframe loads
-                            iframe.onload = function() {
-                                loadSuccess = true;
-                                console.log('Document loaded successfully');
-                            };
+                            if (bodyContent && bodyContent.length > 100) {
+                                console.log('Iframe content successfully loaded and accessible');
+                                statusDiv.innerHTML = '<strong>Status:</strong> Document loaded successfully. Content is displaying correctly.';
+                            } else {
+                                console.log('Iframe loaded but content appears empty or very small');
+                                statusDiv.innerHTML += '<br><span style="color: #856404;">Content may not be displaying correctly. Try the "Open Document Directly" button.</span>';
+                            }
                         } catch (e) {
-                            console.error('Error setting document URL:', e);
+                            // Cross-origin issues or other iframe access problems
+                            console.log('Could not validate iframe content:', e);
+                            // We still consider it a success, but note the inability to validate
+                            statusDiv.innerHTML += '<br><span style="color: #856404;">Unable to validate content due to security restrictions.</span>';
+                        }
+                    };
+                    
+                    // Create a timer to check loading progress
+                    setTimeout(function() {
+                        if (!loadSuccess) {
+                            console.log('Timeout - falling back to alternative loading method');
                             handleDocumentLoadError();
                         }
-                    } else if (documentPreview) {
-                        displayPreviewInIframe();
-                    } else {
-                        handleDocumentLoadError();
-                    }
-                    
-                    // Function to handle document load errors
-                    function handleDocumentLoadError() {
-                        statusDiv.style.background = '#f8d7da';
-                        statusDiv.style.color = '#721c24';
-                        statusDiv.style.border = '1px solid #f5c6cb';
-                        statusDiv.innerHTML = '<strong>Warning:</strong> Error loading the full document. Attempting to show preview.';
-                        
-                        if (documentPreview) {
-                            displayPreviewInIframe();
-                        } else {
-                            iframe.srcdoc = `
-                                <html>
-                                <head>
-                                    <style>
-                                        body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
-                                        .error { color: #721c24; background: #f8d7da; padding: 15px; border-radius: 4px; }
-                                    </style>
-                                </head>
-                                <body>
-                                    <div class="error">
-                                        <h2>Error Loading Document</h2>
-                                        <p>The document couldn't be loaded. This could be due to:</p>
-                                        <ul style="text-align: left; display: inline-block;">
-                                            <li>Browser storage limitations</li>
-                                            <li>The document is too large</li>
-                                            <li>The page was refreshed and the document URL is no longer valid</li>
-                                        </ul>
-                                        <p>Please try converting your PDF again.</p>
-                                    </div>
-                                </body>
-                                </html>
-                            `;
-                        }
-                    }
-                    
-                    // Function to display preview in iframe
-                    function displayPreviewInIframe() {
-                        try {
-                            console.log('Displaying preview version of document');
-                            
-                            // First check if we have a preview
-                            if (!documentPreview || documentPreview.length < 100) {
-                                throw new Error('Preview content is invalid or too short');
-                            }
-                            
-                            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                            iframeDoc.open();
-                            iframeDoc.write(documentPreview);
-                            iframeDoc.close();
-                            
-                            // Add a note that this is just a preview
-                            const previewNote = document.createElement('div');
-                            previewNote.className = 'preview-note';
-                            previewNote.style.padding = '10px';
-                            previewNote.style.background = '#fff3cd';
-                            previewNote.style.color = '#856404';
-                            previewNote.style.borderRadius = '4px';
-                            previewNote.style.marginTop = '10px'; 
-                            previewNote.style.border = '1px solid #ffeeba';
-                            previewNote.innerHTML = '<strong>Note:</strong> This is showing a preview version. For best results, convert your document again if it appears incomplete.';
-                            documentContainer.insertBefore(previewNote, iframe);
-                            
-                            statusDiv.style.background = '#fff3cd';
-                            statusDiv.style.color = '#856404';
-                            statusDiv.style.border = '1px solid #ffeeba';
-                            statusDiv.innerHTML = '<strong>Notice:</strong> Showing preview version of the document. <a href="upload.html" style="color: #856404; text-decoration: underline; font-weight: bold;">Convert a new document</a>';
-                        } catch (e) {
-                            console.error('Error displaying preview:', e);
-                            handleNoDocumentAvailable();
-                        }
-                    }
-                    
-                    // Update button text
-                    loadButton.textContent = 'Reload Document';
+                    }, 5000);
                 } else {
                     statusDiv.style.background = '#f8d7da';
                     statusDiv.style.color = '#721c24';
@@ -333,6 +459,148 @@
                 }
             }, 5000);
         }
+
+        // Function to handle document load errors
+        function handleDocumentLoadError() {
+            statusDiv.style.background = '#f8d7da';
+            statusDiv.style.color = '#721c24';
+            statusDiv.style.border = '1px solid #f5c6cb';
+            statusDiv.innerHTML = '<strong>Warning:</strong> Error loading the full document. Attempting to show preview.';
+            
+            if (documentPreview) {
+                displayPreviewInIframe();
+            } else {
+                newFrame.srcdoc = `
+                    <html>
+                    <head>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
+                            .error { color: #721c24; background: #f8d7da; padding: 15px; border-radius: 4px; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="error">
+                            <h2>Error Loading Document</h2>
+                            <p>The document couldn't be loaded. This could be due to:</p>
+                            <ul style="text-align: left; display: inline-block;">
+                                <li>Browser storage limitations</li>
+                                <li>The document is too large</li>
+                                <li>The page was refreshed and the document URL is no longer valid</li>
+                            </ul>
+                            <p>Please try converting your PDF again.</p>
+                        </div>
+                    </body>
+                    </html>
+                `;
+            }
+        }
+
+        // Function to display preview in iframe
+        function displayPreviewInIframe() {
+            try {
+                console.log('Displaying preview version of document');
+                
+                // First check if we have a preview
+                if (!documentPreview || documentPreview.length < 100) {
+                    throw new Error('Preview content is invalid or too short');
+                }
+                
+                // Clear the container and re-add status div
+                documentContainer.innerHTML = metadataDisplay;
+                documentContainer.appendChild(statusDiv);
+                
+                // Create a new iframe for preview
+                const previewFrame = document.createElement('iframe');
+                previewFrame.style.width = '100%';
+                previewFrame.style.height = '600px';
+                previewFrame.style.border = '1px solid #ddd';
+                previewFrame.style.borderRadius = '4px';
+                documentContainer.appendChild(previewFrame);
+                
+                // Write the preview content
+                const iframeDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+                iframeDoc.open();
+                iframeDoc.write(documentPreview);
+                iframeDoc.close();
+                
+                // Add a note that this is just a preview
+                const previewNote = document.createElement('div');
+                previewNote.className = 'preview-note';
+                previewNote.style.padding = '10px';
+                previewNote.style.background = '#fff3cd';
+                previewNote.style.color = '#856404';
+                previewNote.style.borderRadius = '4px';
+                previewNote.style.marginTop = '10px'; 
+                previewNote.style.border = '1px solid #ffeeba';
+                previewNote.innerHTML = '<strong>Note:</strong> This is showing a preview version. For best results, convert your document again if it appears incomplete.';
+                documentContainer.insertBefore(previewNote, previewFrame);
+                
+                statusDiv.style.background = '#fff3cd';
+                statusDiv.style.color = '#856404';
+                statusDiv.style.border = '1px solid #ffeeba';
+                statusDiv.innerHTML = '<strong>Notice:</strong> Showing preview version of the document. <a href="upload.html?t=latest" style="color: #856404; text-decoration: underline; font-weight: bold;">Convert a new document</a>';
+            } catch (e) {
+                console.error('Error displaying preview:', e);
+                handleNoDocumentAvailable();
+            }
+        }
+
+        // Function to display raw content
+        function displayRawContent() {
+            try {
+                console.log('Displaying raw content version of document');
+                
+                // First check if we have raw content
+                if (!documentRaw || documentRaw.length < 100) {
+                    throw new Error('Raw content is invalid or too short');
+                }
+                
+                // Clear the container and re-add status div
+                documentContainer.innerHTML = metadataDisplay;
+                documentContainer.appendChild(statusDiv);
+                
+                // Create a new iframe for raw content
+                const rawFrame = document.createElement('iframe');
+                rawFrame.style.width = '100%';
+                rawFrame.style.height = '600px';
+                rawFrame.style.border = '1px solid #ddd';
+                rawFrame.style.borderRadius = '4px';
+                documentContainer.appendChild(rawFrame);
+                
+                // Write the raw content
+                const iframeDoc = rawFrame.contentDocument || rawFrame.contentWindow.document;
+                iframeDoc.open();
+                iframeDoc.write(documentRaw);
+                iframeDoc.close();
+                
+                // Add a note about using raw content
+                const rawNote = document.createElement('div');
+                rawNote.className = 'raw-note';
+                rawNote.style.padding = '10px';
+                rawNote.style.background = '#cce5ff';
+                rawNote.style.color = '#004085';
+                rawNote.style.borderRadius = '4px';
+                rawNote.style.marginTop = '10px'; 
+                rawNote.style.border = '1px solid #b8daff';
+                rawNote.innerHTML = '<strong>Note:</strong> This is showing the document using raw HTML content. Content may be truncated if the document is large.';
+                documentContainer.insertBefore(rawNote, rawFrame);
+                
+                statusDiv.style.background = '#cce5ff';
+                statusDiv.style.color = '#004085';
+                statusDiv.style.border = '1px solid #b8daff';
+                statusDiv.innerHTML = '<strong>Notice:</strong> Showing document from raw HTML content. <a href="upload.html?t=latest" style="color: #004085; text-decoration: underline; font-weight: bold;">Convert a new document</a>';
+            } catch (e) {
+                console.error('Error displaying raw content:', e);
+                if (documentPreview) {
+                    displayPreviewInIframe();
+                } else {
+                    handleNoDocumentAvailable();
+                }
+            }
+        }
+
+        // Update button text
+        loadButton.textContent = 'Reload Document';
     </script>
 
     <!-- Force refresh: ${new Date().toISOString()} -->

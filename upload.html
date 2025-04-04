@@ -354,35 +354,37 @@
                     // Store a smaller preview version
                     localStorage.setItem('lastConvertedDocument_preview', firstPageContent);
                     
-                    // Automatically redirect to the document-viewer to show the document
+                    // After successful conversion, create and open a standalone HTML file
                     try {
-                        // First check if we're on GitHub Pages
-                        const isGitHubPages = window.location.hostname.includes('github.io');
+                        // Create a blob with the converted HTML content
+                        const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
+                        const htmlUrl = URL.createObjectURL(htmlBlob);
                         
-                        // Different strategy based on environment
-                        if (isGitHubPages) {
-                            // On GitHub Pages, redirect directly to the document viewer
-                            const viewerUrl = 'document-viewer.html?t=' + new Date().getTime();
-                            
-                            if (confirm('Document converted successfully! View it in the document viewer?')) {
-                                window.open(viewerUrl, '_blank');
-                            } else {
-                                // If they decline, offer to go to the document library
-                                if (confirm('Would you like to see your document in the Document Library instead?')) {
-                                    window.location.href = 'documents.html?t=' + new Date().getTime();
-                                }
-                            }
-                        } else {
-                            // On a server environment, offer download option
-                            if (confirm('Document converted successfully! View it in the document viewer?')) {
-                                window.open('document-viewer.html', '_blank');
-                            }
+                        // Show success message
+                        showStatus('PDF converted successfully! Your document has been converted to HTML.', 'success');
+                        
+                        // Automatically open the converted HTML in a new tab
+                        if (confirm('Document converted successfully! View it now?')) {
+                            // Open the HTML file directly in a new tab
+                            window.open(htmlUrl, '_blank');
                         }
                         
+                        // Also offer to save the converted document
+                        if (confirm('Would you like to save the HTML file to your device?')) {
+                            // Create a download link
+                            const downloadLink = document.createElement('a');
+                            downloadLink.href = htmlUrl;
+                            downloadLink.download = htmlFileName;
+                            document.body.appendChild(downloadLink);
+                            downloadLink.click();
+                            document.body.removeChild(downloadLink);
+                        }
+                        
+                        // You might want to clean up the URL object eventually
+                        // setTimeout(() => URL.revokeObjectURL(htmlUrl), 60000); // Clean up after 1 minute
                     } catch (e) {
-                        console.error('Error in document viewer redirect:', e);
-                        // Fallback to simple alert if there's any error
-                        alert('Document converted successfully. You can view it in the Document Library.');
+                        console.error('Error creating HTML file:', e);
+                        showStatus('Conversion successful but there was an issue opening the file.', 'warning');
                     }
                     
                 } catch (blobError) {
