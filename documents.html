@@ -260,17 +260,11 @@
                 const documentPreview = localStorage.getItem('lastConvertedDocument_preview');
                 const metadataStr = localStorage.getItem('lastConvertedMetadata');
                 
-                if (documentUrl) {
-                    // If we have a document URL, use it directly
-                    window.open(documentUrl, '_blank');
-                } else if (documentPreview) {
-                    // Create a blob and URL from the preview
-                    const blob = new Blob([documentPreview], { type: 'text/html' });
-                    const url = URL.createObjectURL(blob);
-                    window.open(url, '_blank');
-                } else {
-                    alert('No converted document found. Please use the PDF Converter to create one.');
-                }
+                console.log('Viewing document, URL available:', !!documentUrl);
+                console.log('Preview available:', !!documentPreview);
+                
+                // Prefer using the document viewer which has better error handling
+                window.open('document-viewer.html', '_blank');
                 
                 // Update the document title if we have metadata
                 if (metadataStr) {
@@ -286,7 +280,11 @@
                         
                         if (metaElem && metadata.date) {
                             const date = new Date(metadata.date);
-                            metaElem.textContent = `Converted on ${date.toLocaleDateString()} - ${metadata.pageCount || ''} pages`;
+                            let pageInfo = '';
+                            if (metadata.pageCount && metadata.pageCount !== 'Unknown') {
+                                pageInfo = ` - ${metadata.pageCount} pages`;
+                            }
+                            metaElem.textContent = `Converted on ${date.toLocaleDateString()}${pageInfo}`;
                         }
                     } catch (e) {
                         console.error('Error updating document info:', e);

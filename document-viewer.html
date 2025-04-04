@@ -64,6 +64,15 @@
             background-color: #45a049;
         }
     </style>
+    <script>
+        // When the page loads, automatically load the document
+        window.addEventListener('DOMContentLoaded', function() {
+            // Auto-load the document
+            setTimeout(function() {
+                document.getElementById('load-document').click();
+            }, 500);
+        });
+    </script>
 </head>
 <body>
     <div class="nav">
@@ -92,6 +101,17 @@
                 const documentPreview = localStorage.getItem('lastConvertedDocument_preview');
                 const documentTitle = localStorage.getItem('lastConvertedTitle');
                 
+                console.log('Attempting to load document');
+                console.log('Document URL:', documentUrl);
+                console.log('Has preview:', documentPreview ? 'Yes' : 'No');
+                
+                // Add a status section
+                const statusDiv = document.createElement('div');
+                statusDiv.style.padding = '10px';
+                statusDiv.style.marginBottom = '15px';
+                statusDiv.style.borderRadius = '4px';
+                statusDiv.style.textAlign = 'left';
+                
                 // Check if we have document information
                 if (documentUrl || documentPreview) {
                     documentContainer.innerHTML = '<div class="loading">Loading document...</div>';
@@ -102,76 +122,123 @@
                         try {
                             const metadata = JSON.parse(metadataStr);
                             metadataDisplay = `
-                                <div class="metadata">
+                                <div class="metadata" style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 4px; border: 1px solid #ddd;">
+                                    <h3 style="margin-top: 0;">Document Details</h3>
                                     <p><strong>Title:</strong> ${metadata.title || documentTitle || 'Untitled Document'}</p>
                                     <p><strong>Date:</strong> ${new Date(metadata.date).toLocaleString()}</p>
                                     <p><strong>Pages:</strong> ${metadata.pageCount || 'Unknown'}</p>
                                 </div>
                             `;
+                            
+                            // Update page title with document title
+                            document.title = metadata.title || documentTitle || 'Document Viewer';
                         } catch (e) {
                             console.error('Error parsing metadata:', e);
+                            metadataDisplay = `
+                                <div class="metadata" style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 4px; border: 1px solid #ddd;">
+                                    <h3 style="margin-top: 0;">Document Details</h3>
+                                    <p><strong>Title:</strong> ${documentTitle || 'Untitled Document'}</p>
+                                    <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>
+                                </div>
+                            `;
                         }
                     }
+                    
+                    // Add status message
+                    statusDiv.style.background = '#d4edda';
+                    statusDiv.style.color = '#155724';
+                    statusDiv.style.border = '1px solid #c3e6cb';
+                    statusDiv.innerHTML = '<strong>Status:</strong> Document loaded successfully. ' + 
+                                        (localStorage.getItem('conversionStatus') || '');
                     
                     // Create an iframe to display the document
                     const iframe = document.createElement('iframe');
                     iframe.style.width = '100%';
                     iframe.style.height = '600px';
-                    iframe.style.border = 'none';
+                    iframe.style.border = '1px solid #ddd';
+                    iframe.style.borderRadius = '4px';
                     
                     // Clear container and add iframe
                     documentContainer.innerHTML = metadataDisplay;
+                    documentContainer.appendChild(statusDiv);
                     documentContainer.appendChild(iframe);
                     
+                    // Count successful loads
+                    let loadSuccess = false;
+                    
                     if (documentUrl) {
-                        // If we have a URL (which should work for larger documents)
                         try {
+                            console.log('Attempting to load document from URL:', documentUrl);
+                            
                             // Add error handling for the iframe
                             iframe.onerror = function() {
                                 console.error('Error loading document URL');
-                                // Fall back to preview if available
-                                if (documentPreview) {
-                                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                                    iframeDoc.open();
-                                    iframeDoc.write(documentPreview);
-                                    iframeDoc.close();
-                                    
-                                    // Add a note about the fallback
-                                    const fallbackNote = document.createElement('div');
-                                    fallbackNote.style.padding = '10px';
-                                    fallbackNote.style.background = '#f8d7da';
-                                    fallbackNote.style.color = '#721c24';
-                                    fallbackNote.style.borderRadius = '4px';
-                                    fallbackNote.style.marginTop = '10px';
-                                    fallbackNote.innerHTML = '<strong>Notice:</strong> The full document URL was invalid. Showing preview instead.';
-                                    documentContainer.insertBefore(fallbackNote, iframe);
-                                } else {
-                                    iframe.srcdoc = '<div style="padding: 20px; text-align: center;"><p>Error loading document. The URL may be invalid or expired.</p><p>Please try converting your PDF again.</p></div>';
-                                }
+                                handleDocumentLoadError();
                             };
                             
                             // Set a timeout to check if the iframe loads
                             setTimeout(function() {
-                                if (!iframe.contentWindow || !iframe.contentWindow.document.body.innerHTML) {
-                                    iframe.onerror();
+                                if (!loadSuccess) {
+                                    console.log('Timeout - falling back to alternative loading method');
+                                    handleDocumentLoadError();
                                 }
                             }, 3000);
                             
+                            // Try to set the source directly
                             iframe.src = documentUrl;
+                            
+                            // Monitor when the iframe loads
+                            iframe.onload = function() {
+                                loadSuccess = true;
+                                console.log('Document loaded successfully');
+                            };
                         } catch (e) {
                             console.error('Error setting document URL:', e);
-                            // Fall back to preview
-                            if (documentPreview) {
-                                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                                iframeDoc.open();
-                                iframeDoc.write(documentPreview);
-                                iframeDoc.close();
-                            } else {
-                                iframe.srcdoc = '<div style="padding: 20px; text-align: center;"><p>Error loading document: ' + e.message + '</p><p>Please try converting your PDF again.</p></div>';
-                            }
+                            handleDocumentLoadError();
                         }
                     } else if (documentPreview) {
-                        // If we have a preview version
+                        displayPreviewInIframe();
+                    } else {
+                        handleDocumentLoadError();
+                    }
+                    
+                    // Function to handle document load errors
+                    function handleDocumentLoadError() {
+                        statusDiv.style.background = '#f8d7da';
+                        statusDiv.style.color = '#721c24';
+                        statusDiv.style.border = '1px solid #f5c6cb';
+                        statusDiv.innerHTML = '<strong>Warning:</strong> Error loading the full document. Attempting to show preview.';
+                        
+                        if (documentPreview) {
+                            displayPreviewInIframe();
+                        } else {
+                            iframe.srcdoc = `
+                                <html>
+                                <head>
+                                    <style>
+                                        body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
+                                        .error { color: #721c24; background: #f8d7da; padding: 15px; border-radius: 4px; }
+                                    </style>
+                                </head>
+                                <body>
+                                    <div class="error">
+                                        <h2>Error Loading Document</h2>
+                                        <p>The document couldn't be loaded. This could be due to:</p>
+                                        <ul style="text-align: left; display: inline-block;">
+                                            <li>Browser storage limitations</li>
+                                            <li>The document is too large</li>
+                                            <li>The page was refreshed and the document URL is no longer valid</li>
+                                        </ul>
+                                        <p>Please try converting your PDF again.</p>
+                                    </div>
+                                </body>
+                                </html>
+                            `;
+                        }
+                    }
+                    
+                    // Function to display preview in iframe
+                    function displayPreviewInIframe() {
                         const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
                         iframeDoc.open();
                         iframeDoc.write(documentPreview);
@@ -184,15 +251,28 @@
                         previewNote.style.background = '#fff3cd';
                         previewNote.style.color = '#856404';
                         previewNote.style.borderRadius = '4px';
-                        previewNote.style.marginTop = '10px';
-                        previewNote.innerHTML = '<strong>Note:</strong> This is only showing the first page as a preview due to document size limitations. The full document is available via the download.';
+                        previewNote.style.marginTop = '10px'; 
+                        previewNote.style.border = '1px solid #ffeeba';
+                        previewNote.innerHTML = '<strong>Note:</strong> This is showing a preview version. For best results, access your document directly after converting.';
                         documentContainer.insertBefore(previewNote, iframe);
+                        
+                        statusDiv.style.background = '#fff3cd';
+                        statusDiv.style.color = '#856404';
+                        statusDiv.style.border = '1px solid #ffeeba';
+                        statusDiv.innerHTML = '<strong>Notice:</strong> Showing preview version of the document.';
                     }
                     
                     // Update button text
                     loadButton.textContent = 'Reload Document';
                 } else {
-                    documentContainer.innerHTML = '<p>No converted document found in browser storage. Please use the PDF Converter to convert a document first.</p>';
+                    statusDiv.style.background = '#f8d7da';
+                    statusDiv.style.color = '#721c24';
+                    statusDiv.style.border = '1px solid #f5c6cb';
+                    statusDiv.innerHTML = '<strong>Error:</strong> No converted document found. Please use the PDF Converter first.';
+                    
+                    documentContainer.innerHTML = '';
+                    documentContainer.appendChild(statusDiv);
+                    documentContainer.innerHTML += '<p style="text-align: center; margin-top: 30px;">No converted document found in browser storage. Please use the PDF Converter to convert a document first.</p>';
                 }
             });
         });
