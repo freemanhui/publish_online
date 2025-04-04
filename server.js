@@ -11,8 +11,32 @@ const { exec } = require('child_process');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Directory for storing converted documents
+const DOCUMENTS_DIR = path.join(__dirname, 'documents');
+const METADATA_FILE = path.join(DOCUMENTS_DIR, 'metadata.json');
+
+// Ensure directories exist
+['uploads', 'converted', 'processed', 'documents'].forEach(dir => {
+    const dirPath = path.join(__dirname, dir);
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+    }
+});
+
+// Create metadata file if it doesn't exist
+if (!fs.existsSync(METADATA_FILE)) {
+    fs.writeFileSync(METADATA_FILE, JSON.stringify([], null, 2));
+}
+
+// Middleware to parse JSON and URL-encoded form data
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // Serve static files
 app.use(express.static('./'));
+
+// For serving documents from the documents directory
+app.use('/documents', express.static(DOCUMENTS_DIR));
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -37,8 +61,8 @@ const upload = multer({
     storage: storage,
     limits: { fileSize: 50 * 1024 * 1024 }, // Limit to 50MB
     fileFilter: function (req, file, cb) {
-        // Accept only PDF files
-        if (file.mimetype !== 'application/pdf') {
+        // Accept only PDF files for PDF uploads or any file for document saves
+        if (req.path === '/upload' && file.mimetype !== 'application/pdf') {
             req.fileValidationError = 'Only PDF files are allowed';
             return cb(null, false, new Error('Only PDF files are allowed'));
         }
@@ -121,6 +145,113 @@ app.post('/upload', upload.single('pdf-file'), (req, res) => {
     }
 });
 
+// Handle document saving
+app.post('/save-document', upload.single('file'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+    
+    try {
+        // Parse metadata from request
+        const metadata = JSON.parse(req.body.metadata || '{}');
+        
+        // Validate required fields
+        if (!metadata.title || !metadata.fileName) {
+            return res.status(400).json({ success: false, message: 'Title and fileName are required in metadata' });
+        }
+        
+        // Save the file to the documents directory
+        const documentPath = path.join(DOCUMENTS_DIR, metadata.fileName);
+        fs.copyFileSync(req.file.path, documentPath);
+        
+        // Read existing metadata
+        let documents = [];
+        try {
+            const metadataContent = fs.readFileSync(METADATA_FILE, 'utf8');
+            documents = JSON.parse(metadataContent);
+        } catch (err) {
+            console.error('Error reading metadata:', err);
+        }
+        
+        // Add new document metadata
+        const newDoc = {
+            id: Date.now(), // Simple ID generation
+            title: metadata.title,
+            fileName: metadata.fileName,
+            date: metadata.date || new Date().toISOString(),
+            fileSize: metadata.fileSize || fs.statSync(documentPath).size
+        };
+        
+        documents.push(newDoc);
+        
+        // Save updated metadata
+        fs.writeFileSync(METADATA_FILE, JSON.stringify(documents, null, 2));
+        
+        return res.json({
+            success: true,
+            message: 'Document saved successfully',
+            document: newDoc
+        });
+    } catch (err) {
+        console.error('Error saving document:', err);
+        return res.status(500).json({ success: false, message: `Error saving document: ${err.message}` });
+    } finally {
+        // Clean up uploaded file
+        if (req.file && fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
+        }
+    }
+});
+
+// API endpoint to get all documents
+app.get('/documents', (req, res) => {
+    try {
+        // Read metadata file
+        const metadataContent = fs.readFileSync(METADATA_FILE, 'utf8');
+        const documents = JSON.parse(metadataContent);
+        
+        res.json(documents);
+    } catch (err) {
+        console.error('Error reading documents:', err);
+        res.status(500).json({ success: false, message: `Error reading documents: ${err.message}` });
+    }
+});
+
+// API endpoint to delete a document
+app.delete('/documents/:id', (req, res) => {
+    const documentId = req.params.id;
+    
+    try {
+        // Read metadata
+        const metadataContent = fs.readFileSync(METADATA_FILE, 'utf8');
+        let documents = JSON.parse(metadataContent);
+        
+        // Find the document
+        const documentIndex = documents.findIndex(doc => doc.id.toString() === documentId);
+        
+        if (documentIndex === -1) {
+            return res.status(404).json({ success: false, message: 'Document not found' });
+        }
+        
+        const documentToDelete = documents[documentIndex];
+        
+        // Delete the file
+        const filePath = path.join(DOCUMENTS_DIR, documentToDelete.fileName);
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+        
+        // Remove from metadata
+        documents.splice(documentIndex, 1);
+        fs.writeFileSync(METADATA_FILE, JSON.stringify(documents, null, 2));
+        
+        res.json({ success: true, message: 'Document deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting document:', err);
+        res.status(500).json({ success: false, message: `Error deleting document: ${err.message}` });
+    }
+});
+
 // Handle PDF processing to extract text and images
 app.post('/process', upload.single('pdf-file'), (req, res) => {
     if (!req.file) {
@@ -154,16 +285,14 @@ app.post('/process', upload.single('pdf-file'), (req, res) => {
     }
 });
 
-// Create uploads and processed directories
-['uploads', 'converted', 'processed'].forEach(dir => {
-    const dirPath = path.join(__dirname, dir);
-    if (!fs.existsSync(dirPath)) {
-        fs.mkdirSync(dirPath, { recursive: true });
-    }
+// Add a route to serve the document library
+app.get('/library', (req, res) => {
+    res.sendFile(path.join(__dirname, 'documents.html'));
 });
 
 // Start the server
 app.listen(port, () => {
     console.log(`PDF Converter Server running on http://localhost:${port}`);
     console.log(`Upload PDF at http://localhost:${port}/upload.html`);
+    console.log(`Document Library at http://localhost:${port}/documents.html`);
 }); 

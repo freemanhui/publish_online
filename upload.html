@@ -165,6 +165,8 @@
                 
                 // Generate HTML content
                 const numPages = pdf.numPages;
+                const fileName = title.replace(/\s+/g, '-').toLowerCase();
+                const htmlFileName = `${fileName}.html`;
                 let htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -177,6 +179,7 @@
     <div class="nav">
         <a href="index.html">Home</a>
         <a href="upload.html">PDF Converter</a>
+        <a href="documents.html">Document Library</a>
     </div>
     <div class="pdf-container">
         <h1>${title}</h1>`;
@@ -264,15 +267,22 @@
                 // Create download link
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `${title.replace(/\s+/g, '-').toLowerCase()}.html`;
+                a.download = htmlFileName;
                 
                 // Trigger download
                 a.click();
                 
+                // Save to website using fetch API
+                try {
+                    await saveToWebsite(htmlFileName, htmlContent, title);
+                    showStatus('PDF converted successfully! The document has been added to the website and downloaded to your device.', 'success');
+                } catch (saveError) {
+                    console.error('Error saving to website:', saveError);
+                    showStatus('PDF converted successfully! The HTML file has been downloaded but could not be saved to the website.', 'success');
+                }
+                
                 // Clean up
                 URL.revokeObjectURL(url);
-                
-                showStatus('PDF converted successfully! The HTML file has been downloaded.', 'success');
                 
                 // Open the HTML in a new tab
                 window.open(url, '_blank');
@@ -285,6 +295,36 @@
                 progressContainer.style.display = 'none';
             }
         });
+        
+        /**
+         * Saves the converted HTML file to the website
+         */
+        async function saveToWebsite(fileName, content, title) {
+            // Create metadata for the document
+            const metadata = {
+                title: title,
+                fileName: fileName,
+                date: new Date().toISOString(),
+                fileSize: new Blob([content]).size
+            };
+            
+            // Use FormData to handle the file upload
+            const formData = new FormData();
+            formData.append('file', new Blob([content], { type: 'text/html' }), fileName);
+            formData.append('metadata', JSON.stringify(metadata));
+            
+            // Send the file to the server
+            const response = await fetch('/save-document', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Server responded with status: ${response.status}`);
+            }
+            
+            return await response.json();
+        }
         
         function readFileAsArrayBuffer(file) {
             return new Promise((resolve, reject) => {
