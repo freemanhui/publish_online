@@ -262,9 +262,50 @@
 </html>`;
                 
                 // Save the HTML content to localStorage for the static Document Library
-                localStorage.setItem('lastConvertedDocument', htmlContent);
-                localStorage.setItem('lastConvertedTitle', title);
-                localStorage.setItem('lastConvertedDate', new Date().toISOString());
+                try {
+                    // Some PDFs might be too large for localStorage, so we'll save a smaller version
+                    // Extract just the document metadata and first page for preview
+                    const firstPageContent = htmlContent.split('<div class="pdf-page" id="page-2">')[0];
+                    const previewContent = firstPageContent + '</div></body></html>';
+                    
+                    // Store a smaller preview version
+                    localStorage.setItem('lastConvertedDocument_preview', previewContent);
+                    localStorage.setItem('lastConvertedTitle', title);
+                    localStorage.setItem('lastConvertedDate', new Date().toISOString());
+                    
+                    // Store the full document as a blob URL instead of the raw HTML
+                    const fullDocBlob = new Blob([htmlContent], { type: 'text/html' });
+                    const fullDocUrl = URL.createObjectURL(fullDocBlob);
+                    localStorage.setItem('lastConvertedDocumentUrl', fullDocUrl);
+                    
+                    // Store metadata about the document
+                    const docMetadata = {
+                        title: title,
+                        fileName: htmlFileName,
+                        date: new Date().toISOString(),
+                        pageCount: numPages,
+                        hasFullVersion: true
+                    };
+                    localStorage.setItem('lastConvertedMetadata', JSON.stringify(docMetadata));
+                    
+                    console.log('Document preview saved to localStorage');
+                } catch (storageError) {
+                    console.error('Error saving to localStorage:', storageError);
+                    // Create a fallback URL for accessing the document
+                    const fallbackBlob = new Blob([htmlContent], { type: 'text/html' });
+                    const fallbackUrl = URL.createObjectURL(fallbackBlob);
+                    localStorage.setItem('lastConvertedDocumentUrl', fallbackUrl);
+                    localStorage.setItem('lastConvertedTitle', title);
+                    localStorage.setItem('lastConvertedDate', new Date().toISOString());
+                    localStorage.setItem('lastConvertedMetadata', JSON.stringify({
+                        title: title,
+                        fileName: htmlFileName,
+                        date: new Date().toISOString(),
+                        pageCount: numPages,
+                        hasFullVersion: false,
+                        errorMsg: storageError.message
+                    }));
+                }
                 
                 // Create downloadable HTML file
                 const blob = new Blob([htmlContent], { type: 'text/html' });

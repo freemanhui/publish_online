@@ -256,17 +256,41 @@
                 e.preventDefault();
                 
                 // Check local storage for last converted document
-                const lastConvertedDocument = localStorage.getItem('lastConvertedDocument');
+                const documentUrl = localStorage.getItem('lastConvertedDocumentUrl');
+                const documentPreview = localStorage.getItem('lastConvertedDocument_preview');
+                const metadataStr = localStorage.getItem('lastConvertedMetadata');
                 
-                if (lastConvertedDocument) {
-                    // Create a Blob from the HTML string
-                    const blob = new Blob([lastConvertedDocument], { type: 'text/html' });
+                if (documentUrl) {
+                    // If we have a document URL, use it directly
+                    window.open(documentUrl, '_blank');
+                } else if (documentPreview) {
+                    // Create a blob and URL from the preview
+                    const blob = new Blob([documentPreview], { type: 'text/html' });
                     const url = URL.createObjectURL(blob);
-                    
-                    // Open in a new tab
                     window.open(url, '_blank');
                 } else {
                     alert('No converted document found. Please use the PDF Converter to create one.');
+                }
+                
+                // Update the document title if we have metadata
+                if (metadataStr) {
+                    try {
+                        const metadata = JSON.parse(metadataStr);
+                        const docItem = viewConvertedLink.closest('.document-item');
+                        const titleElem = docItem.querySelector('.document-title');
+                        const metaElem = docItem.querySelector('.document-meta');
+                        
+                        if (titleElem && metadata.title) {
+                            titleElem.textContent = metadata.title;
+                        }
+                        
+                        if (metaElem && metadata.date) {
+                            const date = new Date(metadata.date);
+                            metaElem.textContent = `Converted on ${date.toLocaleDateString()} - ${metadata.pageCount || ''} pages`;
+                        }
+                    } catch (e) {
+                        console.error('Error updating document info:', e);
+                    }
                 }
             });
         });

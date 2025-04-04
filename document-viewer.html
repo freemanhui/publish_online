@@ -86,25 +86,64 @@
             const documentContainer = document.getElementById('document-container');
             
             loadButton.addEventListener('click', function() {
-                // Try to get the last converted document from localStorage
-                const lastDocument = localStorage.getItem('lastConvertedDocument');
+                // Get document metadata
+                const metadataStr = localStorage.getItem('lastConvertedMetadata');
+                const documentUrl = localStorage.getItem('lastConvertedDocumentUrl');
+                const documentPreview = localStorage.getItem('lastConvertedDocument_preview');
+                const documentTitle = localStorage.getItem('lastConvertedTitle');
                 
-                if (lastDocument) {
-                    // Create an iframe to display the HTML content
+                // Check if we have document information
+                if (documentUrl || documentPreview) {
+                    documentContainer.innerHTML = '<div class="loading">Loading document...</div>';
+                    
+                    // Create metadata display
+                    let metadataDisplay = '';
+                    if (metadataStr) {
+                        try {
+                            const metadata = JSON.parse(metadataStr);
+                            metadataDisplay = `
+                                <div class="metadata">
+                                    <p><strong>Title:</strong> ${metadata.title || documentTitle || 'Untitled Document'}</p>
+                                    <p><strong>Date:</strong> ${new Date(metadata.date).toLocaleString()}</p>
+                                    <p><strong>Pages:</strong> ${metadata.pageCount || 'Unknown'}</p>
+                                </div>
+                            `;
+                        } catch (e) {
+                            console.error('Error parsing metadata:', e);
+                        }
+                    }
+                    
+                    // Create an iframe to display the document
                     const iframe = document.createElement('iframe');
                     iframe.style.width = '100%';
                     iframe.style.height = '600px';
                     iframe.style.border = 'none';
                     
-                    // Append the iframe to the container
-                    documentContainer.innerHTML = '';
+                    // Clear container and add iframe
+                    documentContainer.innerHTML = metadataDisplay;
                     documentContainer.appendChild(iframe);
                     
-                    // Write the HTML content to the iframe
-                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                    iframeDoc.open();
-                    iframeDoc.write(lastDocument);
-                    iframeDoc.close();
+                    if (documentUrl) {
+                        // If we have a URL (which should work for larger documents)
+                        iframe.src = documentUrl;
+                    } else if (documentPreview) {
+                        // If we have a preview version
+                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        iframeDoc.open();
+                        iframeDoc.write(documentPreview);
+                        iframeDoc.close();
+                        
+                        // Add a note that this is just a preview
+                        const previewNote = document.createElement('div');
+                        previewNote.className = 'preview-note';
+                        previewNote.style.padding = '10px';
+                        previewNote.style.background = '#fff3cd';
+                        previewNote.style.color = '#856404';
+                        previewNote.style.borderRadius = '4px';
+                        previewNote.style.marginTop = '10px';
+                        previewNote.innerHTML = '<strong>Note:</strong> This is only showing the first page as a preview due to document size limitations. The full document is available via the download.';
+                        documentContainer.insertBefore(previewNote, iframe);
+                    }
                     
                     // Update button text
                     loadButton.textContent = 'Reload Document';
