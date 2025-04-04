@@ -72,18 +72,26 @@ h1 {
 
 .page-text {
     position: relative;
-    min-height: 400px;
     margin-top: 20px;
     font-size: 16px;
     line-height: 1.5;
+    min-height: 200px;
+    overflow: hidden;
+    color: rgba(0,0,0,0.8);
 }
 
-/* For selectable text overlay */
-.page-text span {
-    position: absolute;
-    cursor: text;
-    color: transparent;
-    z-index: 10;
+/* Improved text line styles */
+.text-line {
+    position: relative;
+    margin-bottom: 8px;
+    line-height: 1.4;
+    font-family: Arial, sans-serif;
+    color: #333;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    text-align: left;
+    width: 100%;
+    left: 0;
 }
 
 /* For highlighting selected text */
@@ -92,7 +100,39 @@ h1 {
     color: #000;
 }
 
-/* Media Queries for Responsive Design */
+/* Create a fallback text view option */
+.text-view-toggle {
+    display: block;
+    text-align: center;
+    margin: 10px 0;
+    padding: 5px;
+    background-color: #f1f1f1;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.text-view-toggle:hover {
+    background-color: #e0e0e0;
+}
+
+.text-only-view {
+    display: none;
+    padding: 20px;
+    white-space: pre-wrap;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 20px;
+}
+
+.text-only-view.active {
+    display: block;
+}
+
+/* Mobile Responsiveness */
 @media (max-width: 768px) {
     .pdf-container {
         padding: 10px;
@@ -103,6 +143,10 @@ h1 {
     }
     
     .page-text {
+        font-size: 14px;
+    }
+    
+    .text-line {
         font-size: 14px;
     }
 }
@@ -153,6 +197,16 @@ h1 {
     
     .page-image {
         box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+    
+    .text-line {
+        color: #ddd;
+    }
+    
+    .text-only-view {
+        background-color: #333;
+        border-color: #555;
+        color: #ddd;
     }
     
     ::selection {

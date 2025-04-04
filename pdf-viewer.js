@@ -13,6 +13,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add search functionality
     addSearchBox();
     
+    // Add text view toggle option
+    addTextViewToggle();
+    
     // Handle text selection for copying
     enableTextSelection();
 });
@@ -155,6 +158,56 @@ function addZoomControls() {
 }
 
 /**
+ * Adds a toggle button to switch between image view and text-only view
+ */
+function addTextViewToggle() {
+    const pages = document.querySelectorAll('.pdf-page');
+    if (pages.length === 0) return;
+    
+    pages.forEach(page => {
+        // Create text-only view container
+        const textOnlyView = document.createElement('div');
+        textOnlyView.classList.add('text-only-view');
+        
+        // Extract text from text-lines and add to text-only view
+        const textLines = page.querySelectorAll('.text-line');
+        let pageText = '';
+        
+        textLines.forEach(line => {
+            pageText += line.textContent + '\n';
+        });
+        
+        textOnlyView.textContent = pageText;
+        
+        // Create toggle button
+        const toggleBtn = document.createElement('div');
+        toggleBtn.classList.add('text-view-toggle');
+        toggleBtn.textContent = 'Toggle Text-Only View';
+        toggleBtn.addEventListener('click', function() {
+            textOnlyView.classList.toggle('active');
+            const pageImage = page.querySelector('.page-image');
+            const pageTextLayer = page.querySelector('.page-text');
+            
+            if (textOnlyView.classList.contains('active')) {
+                // Switch to text-only view
+                toggleBtn.textContent = 'Show Original View';
+                if (pageImage) pageImage.style.display = 'none';
+                if (pageTextLayer) pageTextLayer.style.display = 'none';
+            } else {
+                // Switch back to original view
+                toggleBtn.textContent = 'Toggle Text-Only View';
+                if (pageImage) pageImage.style.display = 'block';
+                if (pageTextLayer) pageTextLayer.style.display = 'block';
+            }
+        });
+        
+        // Add toggle button and text view to page
+        page.appendChild(toggleBtn);
+        page.appendChild(textOnlyView);
+    });
+}
+
+/**
  * Adds search functionality to the PDF viewer
  */
 function addSearchBox() {
@@ -193,21 +246,21 @@ function addSearchBox() {
         // Clear previous highlights
         clearHighlights();
         
-        // Search in all text spans
-        const textSpans = document.querySelectorAll('.page-text span');
+        // Search in all text elements
+        const textLines = document.querySelectorAll('.text-line');
         let matchCount = 0;
         let firstMatchPage = null;
         
-        textSpans.forEach(span => {
-            const text = span.textContent.toLowerCase();
+        textLines.forEach(line => {
+            const text = line.textContent.toLowerCase();
             if (text.includes(searchTerm)) {
                 // Highlight matches
-                highlightText(span, searchTerm);
+                highlightText(line, searchTerm);
                 matchCount++;
                 
                 // Store first match page for navigation
                 if (!firstMatchPage) {
-                    const pageEl = span.closest('.pdf-page');
+                    const pageEl = line.closest('.pdf-page');
                     if (pageEl) {
                         firstMatchPage = pageEl;
                     }
@@ -258,7 +311,7 @@ function addSearchBox() {
     }
     
     function clearHighlights() {
-        document.querySelectorAll('.page-text span mark').forEach(mark => {
+        document.querySelectorAll('.text-line mark').forEach(mark => {
             const parent = mark.parentNode;
             if (parent) {
                 parent.textContent = parent.textContent;
@@ -271,14 +324,11 @@ function addSearchBox() {
  * Enables text selection for copying
  */
 function enableTextSelection() {
-    const pageTexts = document.querySelectorAll('.page-text');
+    const textElements = document.querySelectorAll('.text-line');
     
-    pageTexts.forEach(textArea => {
-        // Make the text selectable but leave the original styling
-        textArea.querySelectorAll('span').forEach(span => {
-            span.style.color = 'black';
-            span.style.pointerEvents = 'auto';
-        });
+    textElements.forEach(element => {
+        element.style.userSelect = 'text';
+        element.style.cursor = 'text';
     });
 }
 

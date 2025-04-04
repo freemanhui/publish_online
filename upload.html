@@ -188,7 +188,7 @@
                     // Get the page
                     const page = await pdf.getPage(i);
                     
-                    // Create a canvas for rendering
+                    // Create a canvas for rendering the page
                     const viewport = page.getViewport({ scale: 1.5 });
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d');
@@ -198,11 +198,46 @@
                     // Render the page to canvas
                     await page.render({ canvasContext: context, viewport: viewport }).promise;
                     
-                    // Get text content
+                    // Get text content with improved positioning
                     const textContent = await page.getTextContent();
+                    const textItems = textContent.items;
                     
                     // Convert canvas to image
                     const imgData = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    // Create a more structured text layer using a table-like approach
+                    // Group text by vertical position to better handle columns
+                    const textDivs = [];
+                    const textPositions = {};
+                    
+                    // First pass: determine text positions and group by similar y coordinates
+                    textItems.forEach(item => {
+                        // Round y position to nearest 10px to group nearby text
+                        const yPos = Math.round(item.transform[5] / 10) * 10;
+                        if (!textPositions[yPos]) {
+                            textPositions[yPos] = [];
+                        }
+                        textPositions[yPos].push(item);
+                    });
+                    
+                    // Sort positions vertically
+                    const sortedYPositions = Object.keys(textPositions).sort((a, b) => parseInt(a) - parseInt(b));
+                    
+                    // Second pass: create lines of text for each group, sorted by x position
+                    sortedYPositions.forEach(yPos => {
+                        const lineItems = textPositions[yPos].sort((a, b) => a.transform[4] - b.transform[4]);
+                        
+                        // Create a div for this line
+                        const lineText = lineItems.map(item => {
+                            // Check if it's a space
+                            if (item.str.trim() === '') {
+                                return ' ';
+                            }
+                            return item.str;
+                        }).join(' ');
+                        
+                        textDivs.push(`<div class="text-line" style="top: ${yPos}px;">${lineText}</div>`);
+                    });
                     
                     // Add page to HTML
                     htmlContent += `
@@ -210,7 +245,7 @@
             <div class="page-number">Page ${i}</div>
             <img src="${imgData}" alt="Page ${i}" class="page-image">
             <div class="page-text">
-                ${textContent.items.map(item => `<span style="position: absolute; left: ${item.transform[4]}px; top: ${item.transform[5]}px;">${item.str}</span>`).join('')}
+                ${textDivs.join('\n                ')}
             </div>
         </div>`;
                 }
