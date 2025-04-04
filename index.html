@@ -12,47 +12,46 @@
             margin: 0 auto;
             padding: 20px;
             background-color: #fff;
+            color: #333;
         }
-        img {
-            max-width: 100%;
-            height: auto;
-            margin: 20px 0;
-            display: block;
-        }
-        h1, h2 {
+        .book-title {
+            font-size: 32px;
             text-align: center;
-            color: #000;
+            margin: 40px 0 20px;
         }
         h1 {
-            font-size: 24pt;
-            margin-bottom: 30px;
+            font-size: 28px;
+            text-align: center;
+            margin: 30px 0;
         }
         h2 {
-            font-size: 21pt;
-            margin: 30px 0;
+            font-size: 24px;
+            margin: 25px 0 15px;
+        }
+        h3 {
+            font-size: 20px;
+            margin: 20px 0 10px;
         }
         p {
-            font-size: 15pt;
             margin-bottom: 15px;
+            text-align: justify;
         }
-        .image-container {
-            margin: 30px 0;
-            text-align: center;
+        .quote {
+            font-style: italic;
+            padding-left: 20px;
+            border-left: 3px solid #ccc;
+            margin: 20px 0;
         }
-        .publication-info {
-            text-align: center;
-            font-size: 11pt;
-            font-family: Arial, sans-serif;
-            margin: 30px 0;
-            line-height: 1.4;
-        }
-        .author-image {
-            width: 138pt;
-            margin: 20px auto;
+        .quote-author {
+            font-style: normal;
+            text-align: right;
+            margin-top: 5px;
         }
         .review {
             margin: 20px 0;
-            padding: 0 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
         }
         .review p {
             font-style: italic;
@@ -62,308 +61,364 @@
             text-align: right;
             font-weight: bold;
         }
-        .toc {
-            margin: 40px 0;
-            padding: 20px;
-            background-color: #f9f9f9;
+        .publication-info {
+            font-size: 14px;
+            text-align: center;
+            margin: 30px 0;
+            padding: 15px;
+            background-color: #f5f5f5;
             border-radius: 5px;
         }
-        .toc h2 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-        .toc p {
-            margin: 15px 0;
-            font-size: 16pt;
+        .toc {
+            margin: 30px 0;
         }
         .toc ul {
-            margin: 0 0 20px 20px;
+            list-style-type: none;
             padding-left: 20px;
         }
         .toc li {
             margin: 8px 0;
-            font-size: 14pt;
-            color: #444;
         }
-        .toc a {
-            color: #0000ED;
-            text-decoration: none;
-            transition: color 0.2s;
+        .part-heading {
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+            margin: 40px 0 20px;
+            text-transform: uppercase;
         }
-        .toc a:hover {
-            text-decoration: underline;
-            color: #0000AA;
+        .chapter {
+            margin-top: 50px;
         }
-        .toc strong {
-            display: block;
-            margin: 25px 0 15px;
-            font-size: 18pt;
-            color: #222;
-        }
-        .copyright {
-            font-size: 11pt;
-            font-family: Arial, sans-serif;
-            margin: 30px 0;
-            line-height: 1.4;
-        }
-        .preface, .acknowledgments {
-            margin: 2em 0;
-            padding: 1.5em;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-        }
-        .preface h2, .acknowledgments h2 {
-            color: #333;
-            margin-bottom: 1em;
-            font-size: 1.8em;
-        }
-        .preface p, .acknowledgments p {
-            margin-bottom: 1.2em;
-            line-height: 1.6;
-            text-align: justify;
-        }
-        .preface em, .acknowledgments em {
+        .dedication {
             font-style: italic;
+            text-align: center;
+            margin: 40px 0;
         }
-        .introduction {
-            margin: 2em 0;
-            padding: 1.5em;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-        }
-        .introduction h2 {
-            color: #333;
-            margin-bottom: 1em;
-            font-size: 1.8em;
-        }
-        .introduction p {
-            margin-bottom: 1.2em;
-            line-height: 1.6;
-            text-align: justify;
-        }
-        .introduction em {
-            font-style: italic;
-        }
-        .introduction sup {
-            font-size: 0.7em;
-            vertical-align: super;
+        .footnote {
+            font-size: 0.8em;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+            margin-top: 40px;
         }
     </style>
 </head>
 <body>
-    <h1>Irreducible: Consciousness, Life, Computers, and Human</h1>
+    <h1 class="book-title">Irreducible: Consciousness, Life, Computers, and Human</h1>
     
-    <div class="content">
+    <div class="review">
         <h2>What people are saying about Irreducible</h2>
+        <p>"Federico Faggin is probably the most well-rounded Idealist alive. He embodies the near-perfect combination of hard-nosed, scientifically informed thought with direct introspective insights into the primacy of consciousness."</p>
+        <p>"This book is a true philosophical treasure and, in some ways, a culmination of Western thought; an absolute must-read."</p>
+        <p class="author">- Bernardo Kastrup</p>
+    </div>
 
-        <div class="review">
-            <p>"Federico Faggin is probably the most well-rounded Idealist alive. He embodies the near-perfect combination of hard-nosed, scientifically informed thought with direct introspective insights into the primacy of consciousness."</p>
-            <p>"This book is a true philosophical treasure and, in some ways, a culmination of Western thought; an absolute must-read."</p>
-            <p class="author">- Bernardo Kastrup</p>
-        </div>
+    <div class="publication-info">
+        <p>First published by Essentia Books, 2024</p>
+        <p>Essentia Books is an imprint of John Hunt Publishing Ltd., No. 3 East St., Alresford, Hampshire SO24 9EE, UK</p>
+        <p><a href="mailto:office@jhpbooks.com">office@jhpbooks.com</a></p>
+        <p><a href="http://www.johnhuntpublishing.com/essentia-books/">www.johnhuntpublishing.com/essentia-books/</a></p>
+        
+        <p>Text copyright: Federico Faggin 2023</p>
+        <p>ISBN: 978 1 80341 509 3<br>
+        978 1 80341 510 9 (ebook)</p>
+        <p>Library of Congress Control Number: 2023931858</p>
+        <p>All rights reserved. Except for brief quotations in critical articles or reviews, no part of this book may be reproduced in any manner without prior written permission from the publishers.</p>
+        <p>The rights of Federico Faggin as author have been asserted in accordance with the Copyright, Designs and Patents Act 1988.</p>
+        <p>A CIP catalogue record for this book is available from the British Library.</p>
+        <p>Design: Matthew Greenfield</p>
+        <p>UK: Printed and bound by CPI Group (UK) Ltd, Croydon, CR0 4YY<br>
+        Printed in North America by CPI GPS partners</p>
+        
+        <p>We operate a distinctive and ethical publishing philosophy in all areas of our business, from our global network of authors to production and worldwide distribution.</p>
+    </div>
 
-        <div class="author-image">
-            <img src="images/image7.jpg" alt="Federico Faggin">
-        </div>
+    <div class="toc">
+        <h2>Contents</h2>
+        <p><a href="#preface">Preface</a></p>
+        <p><a href="#introduction">Introduction</a></p>
+        <ul>
+            <li><a href="#search">The Search for Truth</a></li>
+            <li><a href="#awakening">The Awakening</a></li>
+            <li><a href="#questions">Key Questions</a></li>
+            <li><a href="#science">The New Science of Consciousness</a></li>
+        </ul>
+        
+        <p class="part-heading">PART ONE</p>
+        <p>1. <a href="#chapter1">The Nature of Physical Reality</a></p>
+        <ul>
+            <li>What Is the World Like?</li>
+            <li>At the Dawn of Science</li>
+            <li>The Worldview of Classical Physics</li>
+            <li>A New Way of Thinking</li>
+            <li>The End of Classical Physics</li>
+            <li>The Revelation of a New World</li>
+            <li>Quantum Mechanics</li>
+            <li>The End of Certainty</li>
+        </ul>
 
-        <div class="publication-info">
-            <p>First published by Essentia Books, 2024</p>
-            <p>Essentia Books is an imprint of John Hunt Publishing Ltd., No. 3 East St., Alresford,<br>
-            Hampshire SO24 9EE, UK</p>
-            <p><a href="mailto:office@jhpbooks.com">office@jhpbooks.com</a></p>
-            <p><a href="http://www.johnhuntpublishing.com/essentia-books/">www.johnhuntpublishing.com/essentia-books/</a></p>
-        </div>
+        <p>2. The Nature of Quantum Reality</p>
+        <ul>
+            <li>Quantum Field Theory and General Relativity</li>
+            <li>Particles Are Waves of Probability</li>
+            <li>We Don't Know What a Particle Is</li>
+            <li>The Worldview of Quantum Physics</li>
+            <li>A Monistic Conception of the Universe</li>
+            <li>How Do We Know?</li>
+            <li>Semantic and Symbolic Knowledge</li>
+            <li>What Is Consciousness Good For?</li>
+        </ul>
 
-        <div class="toc">
-            <h2>Contents</h2>
-            <p><a href="#preface">Preface</a></p>
-            <p><a href="#intro">Introduction</a></p>
-            <ul>
-                <li><a href="#search">The Search for Truth</a></li>
-                <li><a href="#awakening">The Awakening</a></li>
-                <li><a href="#questions">Key Questions</a></li>
-                <li><a href="#science">The New Science of Consciousness</a></li>
-            </ul>
-            
-            <p><strong>PART ONE</strong></p>
-            <p>1. The Nature of Physical Reality</p>
-            <ul>
-                <li>What Is the World Like?</li>
-                <li>At the Dawn of Science</li>
-                <li>The Worldview of Classical Physics</li>
-                <li>A New Way of Thinking</li>
-                <li>The End of Classical Physics</li>
-                <li>The Revelation of a New World</li>
-                <li>Quantum Mechanics</li>
-                <li>The End of Certainty</li>
-            </ul>
+        <p>3. The Nature of Machines</p>
+        <ul>
+            <li>The Evolution of Machines</li>
+            <li>Before the Information Revolution</li>
+            <li>Computers Are Universal Machines</li>
+            <li>The Nature of Computers</li>
+            <li>Computers Are Reductionistic</li>
+            <li>Computers Are Deterministic</li>
+            <li>Computers Can Be Unpredictable</li>
+            <li>Robots versus Living Organisms</li>
+        </ul>
 
-            <p>2. The Nature of Quantum Reality</p>
-            <ul>
-                <li>Quantum Field Theory and General Relativity</li>
-                <li>Particles Are Waves of Probability</li>
-                <li>We Don't Know What a Particle Is</li>
-                <li>The Worldview of Quantum Physics</li>
-                <li>A Monistic Conception of the Universe</li>
-                <li>How Do We Know?</li>
-                <li>Semantic and Symbolic Knowledge</li>
-                <li>What Is Consciousness Good For?</li>
-            </ul>
+        <p>4. The Nature of Information</p>
+        <ul>
+            <li>A Brief History of Information</li>
+            <li>What Is Information?</li>
+            <li>Information Theory</li>
+            <li>The Meaning of Information</li>
+            <li>Information Processing in Computers</li>
+            <li>Information Processing in Living Systems</li>
+        </ul>
 
-            <p>3. The Nature of Machines</p>
-            <ul>
-                <li>The Evolution of Machines</li>
-                <li>Before the Information Revolution</li>
-                <li>Computers Are Universal Machines</li>
-                <li>The Nature of Computers</li>
-                <li>Computers Are Reductionistic</li>
-                <li>Computers Are Deterministic</li>
-                <li>Computers Can Be Unpredictable</li>
-                <li>Robots versus Living Organisms</li>
-            </ul>
+        <p>5. The Concept of Information Extended</p>
+        <ul>
+            <li>Living Organisms as Information Processors</li>
+            <li>The Wonderful Organization of a Cell</li>
+            <li>There Is More to Information Than Symbols</li>
+            <li>Information Meets Consciousness</li>
+            <li>Live Information</li>
+            <li>The Nature of Languages</li>
+            <li>Is There Meaning in the Universe?</li>
+        </ul>
 
-            <p>4. The Nature of Information</p>
-            <ul>
-                <li>A Brief History of Information</li>
-                <li>What Is Information?</li>
-                <li>Information Theory</li>
-                <li>The Meaning of Information</li>
-                <li>Information Processing in Computers</li>
-                <li>Information Processing in Living Systems</li>
-            </ul>
+        <p>6. The Nature of Life</p>
+        <ul>
+            <li>The Incredible Complexity of a Paramecium</li>
+            <li>A Brief History of Biology</li>
+            <li>Life Is Dynamic</li>
+            <li>Life Is Holistic</li>
+            <li>The Strategies of Life</li>
+            <li>Life as an Ecosystem</li>
+            <li>The Boundary between Animate and Inanimate Matter</li>
+            <li>Life Is Both Quantum and Classical</li>
+            <li>Living Organisms as Information Processors</li>
+            <li>The Fundamental Differences between a Cell and a Computer</li>
+        </ul>
 
-            <p><strong>PART TWO</strong></p>
-            <p>5. The Nature of Life</p>
-            <ul>
-                <li>What Is Life?</li>
-                <li>The Origin of Life</li>
-                <li>The Evolution of Life</li>
-                <li>The Nature of Living Systems</li>
-                <li>Life Is Not Reducible to Physics</li>
-                <li>Life Is Not Reducible to Information</li>
-                <li>The Mystery of Life</li>
-            </ul>
+        <p>7. The Nature of Consciousness</p>
+        <ul>
+            <li>How Does Consciousness Work?</li>
+            <li>Qualia</li>
+            <li>The Hard Problem of Consciousness</li>
+            <li>What Is Consciousness?</li>
+            <li>Qualia and Consciousness</li>
+            <li>Learning, Perception, Comprehension, and Recognition</li>
+            <li>Pattern Recognition versus Comprehension</li>
+            <li>Is Intelligence without Consciousness True Intelligence?</li>
+        </ul>
 
-            <p>6. The Nature of Consciousness</p>
-            <ul>
-                <li>What Is Consciousness?</li>
-                <li>The Hard Problem of Consciousness</li>
-                <li>Consciousness Is Not Reducible to Matter</li>
-                <li>Consciousness Is Not Reducible to Information</li>
-                <li>The Nature of Experience</li>
-                <li>The Unity of Consciousness</li>
-                <li>The Mystery of Consciousness</li>
-            </ul>
+        <p class="part-heading">PART TWO</p>
+        <p>8. A New Vision</p>
+        <ul>
+            <li>Existential Questions</li>
+            <li>The Unsolved Problems</li>
+            <li>The Need for a New Paradigm</li>
+            <li>The QIP Theory: Consciousness Is a Quantum Phenomenon</li>
+            <li>A New Term: Seity</li>
+            <li>The Seity Is Quantum</li>
+            <li>The Existence of Free Will</li>
+        </ul>
 
-            <p><strong>PART THREE</strong></p>
-            <p>7. The Nature of Reality</p>
-            <ul>
-                <li>A New Understanding of Reality</li>
-                <li>The Primacy of Consciousness</li>
-                <li>The Nature of Mind</li>
-                <li>The Nature of Matter</li>
-                <li>The Nature of Time</li>
-                <li>The Nature of Space</li>
-                <li>The Unity of Reality</li>
-            </ul>
+        <p>9. A New Model of Reality</p>
+        <ul>
+            <li>A New Perspective</li>
+            <li>The Creative Principle</li>
+            <li>In Its Image and Likeness</li>
+            <li>Communication between Seities</li>
+            <li>The Natural Evolution of the Laws</li>
+            <li>Information Is Not Ontology</li>
+            <li>Information Is Not Knowing</li>
+            <li>A New Interpretation of Quantum Information</li>
+            <li>The Universe as Exploration of Knowing</li>
+        </ul>
+    </div>
 
-            <p>8. The Future of Humanity</p>
-            <ul>
-                <li>The Challenge of Artificial Intelligence</li>
-                <li>The Limits of Technology</li>
-                <li>The Promise of Consciousness</li>
-                <li>The Evolution of Consciousness</li>
-                <li>A New Vision of Reality</li>
-                <li>A New Vision of Humanity</li>
-                <li>The Way Forward</li>
-            </ul>
-        </div>
+    <div class="dedication">
+        <p>To Elvia, to our children, Marzia, Marc, and Eric, and to Viviana, Irene, Cecilia, and Daniela Sardei for their example of love and cooperation</p>
+    </div>
 
-        <div class="preface">
-            <h2>Preface</h2>
-            <p>Live information. The type of information used by seities to communicate with living organisms. It consists of elementary particles, atoms, and molecules that interact quantum-mechanically and self-organize based on quantum rather than classical laws of physics. Live information makes no sharp distinction between energy, matter, and information. Systems made of live information make no distinction between conscious free will and mechanical knowledge. However, unless their conscious free will changes the behavior informed by their mechanical knowledge, they behave no differently than unconscious robots.</p>
-            
-            <p>I translated the printed version of <em>Irriducibile</em> into English during the second half of 2022, and I decided to integrate into the main text most of the material of the Notes that were previously collected at the end of the book. I also improved the text with further personal reflections and some of the feedback received from the readers of <em>Irriducibile</em>.</p>
+    <div id="preface" class="chapter">
+        <h2>Preface</h2>
+        <p>This book follows my autobiography, titled Silicon: From the invention of the microprocessor to the new science of consciousness (Waterside, 2021), and describes the latest developments of my continuing research on the nature of consciousness and reality.</p>
+        
+        <p>Since 2010 I have deepened the study of consciousness as an irreducible phenomenon and developed the CIP framework (acronym formed by the initials of Consciousness, Information, and Physical). In this conception, the nature of reality consists of two complementary and irreducible aspects: the semantic space of conscious experiences, called C-space, and the informational space of symbolic forms, called I-space. Symbols are created by conscious entities to communicate and explore their inner meaning for the purpose of knowing themselves ever more. Physical space, called P-space, is a virtual space experienced by those conscious entities that control living organisms. The organisms are symbolic structures that interact with the other I-space symbols and generate within themselves symbolic representations of I-space that are perceived as "reality" by the conscious entities. In this framework, consciousness exists only in C-space.</p>
+        
+        <p>In March 2017, I received the following email from Professor Giacomo Mauro D'Ariano:</p>
+        
+        <div class="quote">
+            <p>We met briefly on Vieques Island in January 2014 at the fourth FQXi conference on "Physics of Information". On that occasion I gave a very short talk of only five minutes on the derivation of Dirac's equation from information-theoretic principles. You gave me a very nice compliment. Unfortunately, not knowing you, I had no way of answering.</p>
         </div>
+        
+        <p>An invitation to meet followed.</p>
+        <p>In April 2017 I replied via email:</p>
+        
+        <div class="quote">
+            <p>Dear Giacomo, sorry for the delay with which I reply to your welcomed e-mail. My dream is to derive physics from cognitive rather than materialistic principles. Of course, you are doing the first step, to prove that quantum mechanics is about information, hence syntax. For me, syntax is evidence that semantics must exist somewhere.</p>
+            <p>What is the meaning of the existence of a hierarchy of languages (the physical world), if no one is using them? In my opinion there is a semantic reality that consists of a parallel hierarchy of conscious entities that use particles, atoms, molecules, cells, animals, etc. as symbols for their communications. The materialist only sees the symbolic aspect, and does not realize that behind the stage there are "puppet masters".</p>
+            <p>This is why information theory is essentially isomorphic with quantum mechanics! This is why quantum mechanics must use a probabilistic language! The meaning of a book is free even if the symbols obey deterministic laws (in terms of probability). This is why physics can only guarantee that the next book to be written will obey the laws of symbols, but cannot predict the semantic content of a book that has not yet been written. I think semantics is the real ontology. Therefore semantics is free, even if the syntax is deterministic.</p>
+            <p>These are the issues that fascinate me. And I think this is the right way to restore meaning to a universe that has been declared "pointless" by those who have forgotten that the meaning of existence resides "inside" matter. Today I would say: "It exists in a deeper reality than what manifests itself in space-time"; an interiority that is denied by a zealous materialistic fiat.</p>
+            <p>I'd love to discuss these issues with you if you're interested. I will be in Milan around July 21, where I will be one of the presenters at an event called Campus Party. It would be a good opportunity to meet.</p>
+            <p>Thank you for expressing your gratitude for my heartfelt compliment, and congratulations on your progress in completing Wheeler's dream.</p>
+            <p>Best regards and best wishes, Federico.</p>
+        </div>
+        
+        <p>A few days later, D'Ariano replied by telling me that he would be very pleased to meet for us to discuss "the ontology of information," characterized by the phrase "software without hardware," "which perhaps is very close to what you call ontology of semantics, which I believe you mean that it also involves the 'observer,' i.e., the 'puppeteer."'</p>
+        
+        <p>This was the beginning of a fruitful collaboration, which a couple of years ago allowed us to understand that the pure state of a quantum system can represent the state of consciousness of the system, since it has all the crucial characteristics of a conscious experience made of qualia. This important step brought into focus the "core" of the enigma of consciousness, which made it possible to connect the philosophical notions of the CIP framework with the OPT (Operational Probabilistic Theory), the theory that D'Ariano and his collaborators had developed to demonstrate that quantum physics can be entirely derived from quantum information postulates.</p>
+        
+        <p>This new axiom allows us to claim that consciousness is a quantum phenomenon because it has all the peculiar characteristics of a pure quantum state, i.e., it is a definite and a private state, and so is a pure state which is not clonable, i.e., cannot be copied and therefore cannot be known by any observer. Therefore, such a state, if knowable at all, is knowable only by the system that is in that state. This crucial insight reflects remarkably the phenomenology of our inner experience.</p>
+        
+        <p>If the current idea that consciousness emerges from the functioning of the brain were correct—where the brain is thought to be like a classical computer—then a computer could be conscious. But then consciousness could be copied like we routinely copy computer programs, which is classical information. Yet we know perfectly well that our experience is in constant evolution and is private, knowable only within ourselves. Moreover, the meaning we feel always exceeds any symbolic description we may produce to describe it. Therefore, even the owner of the experience (described by quantum information) can only translate a portion of its experience into symbols (described by classical information).</p>
+        
+        <p>Consciousness is the ability to experience through qualia and know the meaning of the experience. Qualia are the private sensations and feelings that reveal the meaning of the experience to the entity. The ability to know must therefore exist before the knowing, and knowing brings into existence what is known for the first time. Knowing therefore becomes synonymous with existing, and this "miracle" cannot be explained in simpler terms than these. If we accept this principle, the fundamental entities from which everything that exists emerges must be conscious entities similar to the monads of Leibniz.</p>
+        
+        <p>This is the view that will be articulated in Irreducible, a title that refers to the crucial property of the conscious entities endowed with free will that emerge from One, the totality of what exists, and cause the continuing creation and evolution of the universe.</p>
+        
+        <p>One is a Whole, both in potentiality and in actuality, irreducibly dynamic and holistic, that desires to know itself to self-realize. From One emerge monads, or consciousness units, i.e., parts-whole that are inseparable from One and in continuous evolution. These units communicate with each other to know themselves, thus realizing the intention and purpose of One they all share. Therefore, there is becoming in the universe, and the future is not predictable, not even by One.</p>
+        
+        <p>This view is in full agreement with what quantum physics has already revealed to us. Therefore the idea of producing a Theory of Everything (ToE) that can predict the future of the universe is contrary to the deepest message of quantum physics. This does not mean that the search for a theory that reconciles quantum physics with general relativity is not desirable; quite the contrary. The new vision, however, shows us that the most reasonable ToE is a theory in which consciousness and free will have always existed and in which the universe—that is, One—is open because its evolution is the evolution of its knowing. The ToE can only tell us the characteristics of the outer world as symbolic correlations of the inner world of meaning.</p>
+        
+        <p>It is becoming ever more evident that unconscious matter cannot produce consciousness, while conscious entities can produce phenomena that behave like unconscious matter. "More" cannot come out of "less," though the opposite is clearly possible. Crucially, when consciousness and free will are irreducible properties of nature, the evolution of the physical universe can no longer be the work of a "blind watchmaker," but the result of cooperating and intelligent conscious entities that have always existed and are the ultimate cause of the universe's eternal becoming.</p>
+        
+        <p>In this book there is a crucial distinction between conscious and unconscious knowledge that is generally neglected in the scientific literature since consciousness is considered epiphenomenal. This confusion is further facilitated by the lack of appropriate words in the English language to discriminate the two. In the Italian language there are two verbs, conoscere and sapere, instead of only "to know." Conoscere is a deeper form of knowing than sapere because it refers to the knowing that is based on experience and comprehension, whereas sapere can describe the knowing by heart of someone who repeats what he does not understand. In the Italian version of this book I have consistently used conoscere with the meaning, "conscious knowledge," and sapere to mean "unconscious knowledge," even though in their common usage the two verbs are often used interchangeably. In the English version, I have consistently translated conoscere as "knowing" and sapere as "knowledge." This distinction is essential to discriminate between the symbolic-only knowledge of computers or brains and the semantic knowing of a conscious entity.</p>
+    </div>
 
-        <div class="acknowledgments">
-            <h2>Acknowledgments</h2>
-            <p>I thank my wife Elvia for translating the first English draft of <em>Irriducibile</em> in Italian, my son Eric, and Andrea Di Blas for reading the same draft and providing useful comments. Special thanks go to Viviana and Irene Sardei, my sisters-in-law, who served as editors of the Italian draft. Their patient work is highly appreciated because it definitely helped improve the clarity of my thinking and the fluency of the text.</p>
-            
-            <p>I thank Giacomo Mauro D'Ariano, holder of the chair of Theoretical Physics at the University of Pavia, Italy for the many discussions that have allowed me to better understand the physics of quantum information of which he is a world expert. His scientific rigor and the interest in the study of consciousness that now unites us have allowed me to remain with my feet on the ground, so to speak, in the exploration of such a challenging subject.</p>
-            
-            <p>Finally, I thank Enrica Bortolazzi, my book agent, and Guido Meardi, CEO of V-Nova, for their appreciated comments. Many thanks go also to Matteo Stroppa, editor of Mondadori, for his final touch.</p>
-            
-            <p>The English version was reviewed by Elvia Faggi, Edward F. Kelly, Tristan Ze, Andrea Di Blas, Michele Crudele, Franco Ferrant, and Carolyn Sloan Oglesby who are hereby warmly acknowledged. Many thanks go to Mollie Barker for her expert final copyediting.</p>
+    <div id="introduction" class="chapter">
+        <h2>Introduction</h2>
+        
+        <div class="quote">
+            <p>The search for truth must be the ultimate goal of any science.</p>
+            <p class="quote-author">—Augustin-Louis Cauchy, Seven General Physics Lessons</p>
         </div>
-
-        <div class="introduction">
-            <h2 id="intro">Introduction</h2>
-            <p>"Do you know what you are? You are a manuscript of a divine letter. You are a mirror reflecting a noble face. This universe is not outside of you. Look inside yourself; everything you want is already there."</p>
-            
-            <p>I note that we also use a similar process to comprehend. For example, when we want to clarify an idea, we represent it on a piece of paper, or we may build a physical model, or write a computer program that makes a dynamic simulation of it. The marks we make on a piece of paper, on a computer memory, or on a physical model represent the long-term memory of the "symbolic systems" we create.</p>
-            
-            <p>In note 9 of Chapter 1 we saw that the equations of classical physics describe non-linear systems that are chaotic, i.e., systems that are deterministic but unpredictable after some time because their behaviors are very sensitive to their initial conditions. This means that the behaviors of two identical systems differing only by a tiny change in their initial conditions end up being very different after a sufficiently long time. Moreover, any minor disturbance along the way, impossible to predict in an open and interconnected system like our universe, would add other sources of exponential change as the systems evolve.</p>
-            
-            <p>Coherent (i.e., correlated, ordered) combinations of live information create other live information, while classical information is created with incoherent (uncorrelated, disordered) combinations of live symbols to which we attribute meaning through agreements.</p>
-            
-            <p>Note that the amount of information carried by a symbol (state) is defined as the cologarithm of the probability of observing that state. Therefore, the amount of information carried by a state that has probability 1 of occurring is 0 since the cologarithm of 1 is 0. But the definition of information assumes that the probability is objective. Is that true?</p>
-            
-            <p>If we have a sentence of m words, where each word has n meanings, the number of possible meanings is n<sup>m</sup>. For example, a 12-word sentence in which each word has 10 possible meanings has a trillion possible meanings (10<sup>12</sup>), versus only one meaning (1<sup>12</sup>) if each word has one meaning (n = 1). When n >> 1, understanding a sentence requires a non-algorithmic decision impossible for a computer.</p>
-            
-            <p>The first major example of use of probability in physics was the development of the classical theory of gases that derived from first principles the empirical Boyle's Law, and gave birth to statistical physics.</p>
-            
-            <p>Knowledge. Refers to the unconscious knowledge possessed by computers or living organisms in the form of data loaded into their memory, acquired/learned patterns, and action-reaction patterns created by artificial or biological neural networks, or by inference engines. This is also the type of knowledge of a human brain when it operates mechanically without the free will and comprehension that can only come from self-consciousness. This knowledge is mechanical knowledge or symbolic-only knowledge in which conscious meaning is irrelevant.</p>
-            
-            <p>Human beings or animals may be conscious of their mechanical knowledge. However, unless their conscious free will changes the behavior informed by their mechanical knowledge, they behave no differently than unconscious robots.</p>
+        
+        <p>I am a physicist, inventor, and entrepreneur. I was born in Vicenza, Italy during the Second World War in a Catholic family and I received a Laurea degree in physics from the University of Padua in 1965, summa cum laude.</p>
+        
+        <p>In 1968, I moved to Silicon Valley, California to work at Fairchild Semiconductor, where I developed the original silicon gate MOS technology, the process technology that made possible microprocessors, dynamic random access memories (DRAM), non-volatile memories, and CCD image sensors, the key components of the information revolution. In 1970 I moved to Intel where I designed the world's first microprocessor, the Intel 4004, and for five years I led the team that created the 8008, 4040, 8080, and other components that have revolutionized information technology.</p>
+        
+        <p>In late 1974 I founded Zilog, the world's first company entirely dedicated to the microprocessor market, thus starting an entrepreneurial career that occupied the rest of my professional life. Zilog's first microprocessor, the Z80-CPU, became a bestseller and is still in production today (2022).</p>
+        
+        <p>During the second half of the 1980s, I became interested in artificial neural networks and founded Synaptics to develop analog chips capable of emulating neural networks using floating-gate transistors. At that time, neural networks were considered a bad idea by the artificial intelligence (AI) experts. Twenty-five years later, however, they became the only practical solution to the recognition of complex patterns, a very difficult problem.</p>
+        
+        <p>Up to the age of 40, I lived doing what most of us do: I sought happiness outside myself, convinced that to be happy I would have to fulfill everything the world prescribes to that end. I buried myself in work and deeply repressed any interference that might distract me from my objectives, thinking that the harder the goals, the more happiness they should bring me if I succeeded.</p>
+        
+        <p>I rushed to check all the boxes on my imaginary "happiness list," pushing down any inner turmoil. I didn't want to be distracted from my goals for any reason. I told myself that to be happy, I had to first get to the end of that list.</p>
+        
+        <p>I was hostage to a kind of hypnotic trance and I had embraced the competitive and consumerist vision that dominates our society. I had lost the connection with my emotions and my inner reality. I had fallen into the trap most of us fall into.</p>
+        
+        <p>Looking back, I'm sure that, if I hadn't reached the bottom of the list, I would have continued to struggle until my death, without ever realizing that I was confusing an imaginary happiness with a real one.</p>
+        
+        <p>It was only because I crossed the finish line and took a break from the race that I was able to look inside myself. What I found was a deep suffering that I pretended not to feel. My first reaction was: What's wrong with me? How is it possible not to be happy when I have achieved everything that should make me so?</p>
+        
+        <p>As Simone Weil says: "Suffering is a door that we can choose to go through and then we learn something, or we refuse to open, and then nothing is added, rather, it takes everything away from us."</p>
+        
+        <h3 id="search">The Search for Truth</h3>
+        
+        <p>While studying neuroscience I wondered if it was possible to build a conscious computer. If materialism were right—as I then thought—the answer had to be yes. Therefore I explored all possible ways I could think of to achieve such a goal, reflecting deeply on the attributes of awareness. It didn't take long to recognize the big obstacle: the complete lack of understanding of the nature of sensations, feelings, and emotions, what philosophers call qualia. No matter how hard I tried, I could not find any way to convert the electrical signals of the computer into qualia, because qualia belong to a different kind of reality with no apparent connection to symbols. It was like trying to transform the feeling of love one feels for a child into a computer program.</p>
+        
+        <p>I also sensed that the cause of my despair was deeply connected with the mystery of consciousness and that further motivated me to try to understand. My situation placed this enigma at the center of my midlife crisis and led me to an experience of unexpected, unsolicited, and spontaneous awakening, which made me realize that consciousness is fundamental and beyond matter.</p>
+        
+        <p>From that point on, I embarked on a new path of searching for truth, which led me to investigate all aspects of reality, even those that I previously had taken for granted and would have never thought of taking into consideration. I realized that just as I had uncritically accepted religious dogmas as a child, I also had accepted those of science, replacing the old dogmas with the new ones.</p>
+        
+        <p>My awakening experience has already been described in my autobiography, entitled Silicon: From the invention of the microprocessor to the new science of consciousness, first published in Italy in 2019 and in 2021 in USA [1]. For the convenience of the reader, I report the experience below with minimal changes.</p>
+        
+        <h3 id="awakening">The Awakening</h3>
+        
+        <p>In December 1990, while I was at Lake Tahoe, California with my family during the Christmas holidays, I woke up around midnight thirsty. I poured myself a glass of water from the refrigerator in the kitchen and, sipping it, I moved into the adjacent living room to contemplate the lake, now dark and mysterious.</p>
+        
+        <p>I went back to bed and while I was waiting for sleep to return, I suddenly felt a powerful rush of energy emerge from my chest like nothing I had ever experienced before and could not even imagine possible. This alive energy was love, yet a love so intense and so incredibly fulfilling that it surpassed any other notion I previously had about love. Even more surprising was the fact that the source of this love was me.</p>
+        
+        <p>I experienced it as a broad beam of shimmering white light, alive and beatific, gushing from my heart with incredible strength. Then suddenly that light exploded. It filled the room and expanded to embrace the entire universe with the same white brilliance. I knew then, without a shadow of a doubt, that this was the substance out of which everything that exists is made. This was what created the universe out of itself. Then, with immense surprise, I recognized that I was that light!</p>
+        
+        <p>The whole experience lasted perhaps a minute, and it changed me forever. My relationship with the world had always been as a separate observer perceiving the universe as outside myself and disconnected from me. What made this event astonishing was its impossible perspective because I was both the experiencer and the experience. I was simultaneously the observer of the world and the world. I was the world observing itself! And I was concurrently knowing that the world is made of a "substance" that feels like love and that I am that!</p>
+        
+        <p>In other words, the essence of reality was revealed to be a "substance" or nous that knows itself by self-reflection, and its self-knowing is experienced as an irrepressible and dynamic love full of joy and peace.</p>
+        
+        <p>This experience contained an unprecedented force of truth, because it felt true at all levels of my being. At the physical level, my body was alive and vibrant like I had never felt before. At the emotional level I perceived myself as an impossibly powerful source of love, and at the mental level I knew with certainty that everything is "made of" love. For the first time in my life I had experienced the existence of another dimension of reality, a dimension that previously could only be known intellectually by reading about it, but not by living it: the spiritual level in which a person is one with the world.</p>
+        
+        <p>It was a form of direct knowing, stronger than the "certainty" offered by logic; a knowledge from the inside rather than the outside, which simultaneously involved all aspects of my consciousness: the physical, emotional, mental, and spiritual levels.</p>
+        
+        <p>I like to think that I have experienced my nature both as a particle and as a wave, to use an analogy with quantum physics that is impossible to comprehend with ordinary logic. The particle aspect was the ability to maintain my identity despite experiencing myself as the world (the wave aspect). But my identity was also part of the world, because I felt myself to be the world with "my" point of view. So now I think that my identity is like one of the infinite points of view with which One—the totality of what exists —observes and knows itself. In other words, each one of us is a point of view of One, a part of One indivisible from It that contains Its essence and, as such, is eternal.</p>
+        
+        <p>That experience made me understand that, as the famous Lebanese aphorist Kahlil Gibran said: "Spiritual awakening is the most essential thing in human life, it is the only purpose of existence." That experience has completely changed my life and has retained its original intensity and clarity over the years. Even today it continues to have a powerful impact on my life.</p>
+        
+        <h3 id="questions">Key Questions</h3>
+        
+        <div class="quote">
+            <p>Live the questions now. Maybe in the future, gradually, without noticing, one day away, you will live the answers.</p>
+            <p class="quote-author">—Rainer Maria Rilke, 'Be Patient'</p>
         </div>
-
-        <div class="copyright">
-            <p>Text copyright: Federico Faggin 2023</p>
-            <p>ISBN: 978 1 80341 509 3<br>
-            978 1 80341 510 9 (ebook)</p>
-            <p>Library of Congress Control Number: 2023931858</p>
-            <p>All rights reserved. Except for brief quotations in critical articles or reviews, no part of this book may be reproduced in any manner without prior written permission from the publishers.</p>
-            <p>The rights of Federico Faggin as author have been asserted in accordance with the Copyright, Designs and Patents Act 1988.</p>
-            <p>A CIP catalogue record for this book is available from the British Library.</p>
-            <p>Design: Matthew Greenfield</p>
-            <p>UK: Printed and bound by CPI Group (UK) Ltd, Croydon, CR0 4YY<br>
-            Printed in North America by CPI GPS partners</p>
+        
+        <p>The encounter with my spiritual nature began a path of personal investigation into the nature of my consciousnes, the only one I can experience and know. Driven by the desire to understand and reconcile the ineffable unitive experience of awakening with everyday reality, I worked intensely on myself for the following 20 years, during which I continued to carry out my professional activity, first as CEO and then as Chairman of Synaptics.</p>
+        
+        <p>During that time I thoroughly explored my hitherto neglected inner reality, and tried to integrate it with the outer reality, living in and out of the world at the same time, so to speak: "in the world but not of the world." I also understood that the experience of the outer world is based on the reproducibility of shared events, while that of the inner world is strictly private and can be known by others only to the extent that we communicate it.</p>
+        
+        <p>This inner work was the source of many intuitions and spontaneous transformations of thoughts and attitudes which gradually led me to an integration and harmonization of the two worlds, changing me profoundly. The most evident aspect has been the almost complete disappearance of a type of restlessness and mental anxiety that had always been part of my inner landscape.</p>
+        
+        <p>I then began to question the theory that describes us as biological machines similar to computers because, based on the known laws of physics, we should be completely unconscious, just like our computers are. In fact, the taste of wine, the scent of a rose, the color orange, and the love for a son should not exist, because no scientist can explain how electrical or biochemical signals can produce these qualia. The fact that each of us feels them, and "knows" because of them, is indisputable, and this falsifies the idea that current physical theories are complete, i.e., they describe all of reality.</p>
+        
+        <p>We are repeatedly told that we are biological robots, while the intense personal investigation that occurred after my awakening revealed otherwise, through many other extraordinary and spontaneous experiences of consciousness.</p>
+        
+        <p>I felt that, rather than a body, we are spiritual beings temporarily imprisoned in a physical structure similar to a highly sophisticated drone. But if we allow ourselves to be convinced by those who insist we are only our mortal body, we will end up thinking that everything that exists originates only in the physical world. In that case we will not even ask ourselves questions about the nature and purpose of our creative impulses and emotions. In so doing we will also avoid investigating the meaning of our life which, as I now understand, is the most important part of our human existence and experience.</p>
+        
+        <p>In summary, if we believe that the inanimate matter can explain all of reality, we will support an assumption already falsified by the fact that we are conscious.</p>
+        
+        <p>As I progressed in my study, I gradually realized that, if we hypothesized that consciousness and free will are irreducible properties of nature, the scientific vision and narrative of reality would radically change and legitimize a profound spirituality, with unexpected consequences for both science and spirituality. But how could such a drastic change occur?</p>
+        
+        <p>In my opinion, science should try to answer all our fundamental questions, not eliminate from reality what it cannot explain. I therefore decided to devote myself full-time to the scientific study of consciousness, and, in 2011, I created with my wife the Federico and Elvia Faggin Foundation to support basic research on consciousness starting from the premise that it is a fundamental and irreducible aspect of reality. The stakes are too high not to seriously consider the hypothesis that consciousness may exist before matter, or perhaps simultaneously with it.</p>
+        
+        <h3 id="science">The New Science of Consciousness</h3>
+        
+        <p>If we start from consciousness, free will, and creativity as irreducible properties of nature, the whole scientific conception of reality is overturned. In this new vision, the emotional and intuitive parts of life—ignored by materialism—return to play a central role. Aristotle said: "To educate the mind without educating the heart means not educating at all." We cannot let physicalism and reductionism define human nature and leave consciousness out from the description of the universe.</p>
+        
+        <p>The physicalist and reductionist premises are perfect for describing the mechanical and symbolic-informational aspects of reality, but they are inadequate to explain its semantic aspects. If we insist that these assumptions describe all of reality, we eliminate a priori what distinguishes us from our machines and we erase our consciousness, our freedom and, above all, our humanity from the face of the universe.</p>
+        
+        <p>If, on the other hand, we take our inner world seriously and begin to investigate it with love and determination, we will discover a new Weltanschauung that promises a creative and cooperative future for humankind, full of profound satisfactions. Life cannot be defined only by mere biological aspects, but, above all, by the triumph of the spiritual nature of the universe which silently guides us.</p>
+        
+        <p>Quantum physics is already telling us that the universe is holistic and creative, and the new developments in quantum information theory justify, as we will see later, a new and revolutionary theory of consciousness and free will.</p>
+        
+        <p>From my perspective, the only possible way to explain how the universe can create life and consciousness is that the universe is itself alive and conscious from the outset. If you take this hypothesis seriously, the entire conception of reality is transformed, with enormous consequences that point to a brilliant and fulfilling future. Creativity, ethics, free will, and joyful love can only come from consciouness. The immense mechanical intelligence, beyond the reach of the human brain, that comes from the machines we have invented will then add tremendous strength to our wisdom. Otherwise our technology will be used against humankind by those who promote the materialistic vision of the survival of the self-proclaimed fittest.</p>
+    </div>
+    
+    <div class="part-heading">PART ONE</div>
+    
+    <div class="quote">
+        <p>If this science, which will bring great benefits to man, does not help man to understand himself, it will end up turning against man.</p>
+        <p class="quote-author">—Giordano Bruno, Of the Infinite, Universe, and Worlds</p>
+    </div>
+    
+    <div id="chapter1" class="chapter">
+        <h2>1. The Nature of Physical Reality</h2>
+        
+        <div class="quote">
+            <p>In science everything is always different from what it would seem according to common sense.</p>
+            <p class="quote-author">—Bertolt Brecht, Life of Galileo</p>
         </div>
-
-        <div class="image-container">
-            <img src="images/image1.jpg" alt="Image 1">
-        </div>
-        <div class="image-container">
-            <img src="images/image2.jpg" alt="Image 2">
-        </div>
-        <div class="image-container">
-            <img src="images/image3.png" alt="Image 3">
-        </div>
-        <div class="image-container">
-            <img src="images/image4.png" alt="Image 4">
-        </div>
-        <div class="image-container">
-            <img src="images/image5.png" alt="Image 5">
-        </div>
-        <div class="image-container">
-            <img src="images/image6.png" alt="Image 6">
-        </div>
-        <div class="image-container">
-            <img src="images/image8.jpg" alt="Image 8">
-        </div>
-        <div class="image-container">
-            <img src="images/image9.jpg" alt="Image 9">
-        </div>
-        <div class="image-container">
-            <img src="images/image10.jpg" alt="Image 10">
-        </div>
-        <div class="image-container">
-            <img src="images/image11.jpg" alt="Image 11">
-        </div>
-        <div class="image-container">
-            <img src="images/image12.png" alt="Image 12">
-        </div>
+        
+        <h3>What Is the World Like?</h3>
+        
+        <p>Today we are still grappling with this question, which human beings have always asked themselves. For centuries it was believed that the world consisted of earth, water, air, and fire in various proportions.</p>
+        
+        <p>Only in the last hundred years, with the advent of quantum physics, have we made great strides in understanding the nature of reality. We have in fact discovered that matter, which seems solid and compact, is instead made of vibratory energy!</p>
     </div>
 </body>
 </html> 
