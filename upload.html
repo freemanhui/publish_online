@@ -15,7 +15,7 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #fff;
+            background-color: #f5f5f5;
             color: #333;
         }
         h1 {
@@ -77,13 +77,19 @@
             border: 1px solid #f5c6cb;
         }
         .nav {
-            margin: 20px 0;
+            background-color: #fff;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             text-align: center;
+            margin-bottom: 20px;
+            border-radius: 5px;
         }
         .nav a {
-            margin: 0 10px;
+            margin: 0 15px;
             color: #007bff;
             text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
         }
         .nav a:hover {
             text-decoration: underline;
@@ -104,16 +110,50 @@
             line-height: 30px;
             color: white;
         }
+        .welcome-container {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .feature {
+            margin-bottom: 20px;
+        }
+        .feature h2 {
+            color: #007bff;
+            margin-top: 0;
+        }
+        .refresh-notice {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="nav">
-        <a href="index.html?t=latest">Home</a>
         <a href="upload.html?t=latest">PDF Converter</a>
         <a href="documents.html?t=latest">Document Library</a>
     </div>
 
+    <div class="refresh-notice">
+        Last Updated: April 5, 2024 at 12:00 AM - All PDF conversion issues fixed. Try it now!
+    </div>
+
     <h1>PDF to HTML Converter</h1>
+    
+    <div class="welcome-container">
+        <div class="feature">
+            <h2>Welcome to Our PDF to HTML Service</h2>
+            <p>Convert your PDF files to beautiful HTML documents that preserve the original formatting and text. Our converter makes it easy to publish academic papers, books, and other documents online.</p>
+            <p>Use the converter below to transform your PDFs into web-friendly documents with improved typography, smart chapter detection, and responsive design.</p>
+        </div>
+    </div>
     
     <form id="upload-form">
         <label for="pdf-file">Select PDF File:</label>
@@ -631,10 +671,5 @@
             statusMessage.style.display = 'block';
         }
     </script>
-    <!-- Force refresh: ${new Date().toISOString()} -->
-
-    <div style="background-color: #d4edda; color: #155724; padding: 10px; margin-top: 10px; border-radius: 5px; text-align: center;">
-        <strong>Last Updated:</strong> April 5, 2024 at 12:00 AM - All PDF conversion issues fixed. Try it now!
-    </div>
 </body>
 </html> 
