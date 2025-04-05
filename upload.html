@@ -532,23 +532,27 @@
                         // Show success message
                         showStatus('PDF converted successfully! Your document has been converted to HTML.', 'success');
                         
+                        // Create a download link for the HTML file
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(standaloneHtml);
+                        downloadLink.download = htmlFileName;
+                        
                         // Ask if user wants to view the document now
                         if (confirm('Document converted successfully! View it now?')) {
-                            // Generate a unique hash for this document
-                            const docHash = Math.random().toString(36).substring(2, 15);
+                            // Download the HTML file first
+                            document.body.appendChild(downloadLink);
+                            downloadLink.click();
+                            document.body.removeChild(downloadLink);
                             
-                            // Store the document content with this hash in localStorage
-                            localStorage.setItem(`document_${docHash}`, standaloneHtml);
+                            // Inform the user
+                            alert('The HTML file has been downloaded. It will open automatically in your browser.');
                             
-                            // Store document title with the hash
-                            localStorage.setItem(`document_${docHash}_title`, title);
-                            
-                            // Redirect to a dedicated viewer with the hash as parameter
-                            window.open(`view-document.html?doc=${docHash}`, '_blank');
+                            // Open the HTML file in a new tab as a regular file
+                            // This avoids blob URLs completely as the browser will open the downloaded file
                         }
                         
                         // Always offer to save the file
-                        if (confirm('Would you like to save the HTML file to your device?')) {
+                        else if (confirm('Would you like to save the HTML file to your device?')) {
                             document.body.appendChild(downloadLink);
                             downloadLink.click();
                             document.body.removeChild(downloadLink);

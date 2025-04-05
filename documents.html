@@ -268,63 +268,33 @@
                 console.log('Viewing document, URL available:', !!documentUrl);
                 console.log('Raw content available:', !!documentRaw);
                 
-                // Handle document viewing with new approach
+                // Get filename from metadata
+                let fileName = 'converted-document.html';
+                let documentTitle = 'Converted Document';
+                if (metadataStr) {
+                    try {
+                        const metadata = JSON.parse(metadataStr);
+                        if (metadata.fileName) {
+                            fileName = metadata.fileName;
+                        }
+                        if (metadata.title) {
+                            documentTitle = metadata.title;
+                        }
+                    } catch (e) {
+                        console.error('Error parsing metadata:', e);
+                    }
+                }
+                
+                // Handle document viewing with direct HTML download
                 if (documentRaw) {
                     // Use the raw content if available
-                    // Generate a unique hash for the document
-                    const docHash = Math.random().toString(36).substring(2, 15);
-                    
-                    // Store document content with this hash
-                    localStorage.setItem(`document_${docHash}`, documentRaw);
-                    
-                    // Get document title from metadata
-                    let docTitle = 'Converted Document';
-                    if (metadataStr) {
-                        try {
-                            const metadata = JSON.parse(metadataStr);
-                            if (metadata.title) {
-                                docTitle = metadata.title;
-                            }
-                        } catch (e) {
-                            console.error('Error parsing metadata:', e);
-                        }
-                    }
-                    
-                    // Store the document title
-                    localStorage.setItem(`document_${docHash}_title`, docTitle);
-                    
-                    // Open the document viewer with the hash
-                    window.open(`view-document.html?doc=${docHash}`, '_blank');
-                    
+                    downloadAndOpenHTML(documentRaw, fileName, documentTitle);
                 } else if (documentUrl) {
                     // Fetch content from the URL
                     fetch(documentUrl)
                         .then(response => response.text())
                         .then(content => {
-                            // Generate a unique hash for the document
-                            const docHash = Math.random().toString(36).substring(2, 15);
-                            
-                            // Store document content with this hash
-                            localStorage.setItem(`document_${docHash}`, content);
-                            
-                            // Get document title from metadata
-                            let docTitle = 'Converted Document';
-                            if (metadataStr) {
-                                try {
-                                    const metadata = JSON.parse(metadataStr);
-                                    if (metadata.title) {
-                                        docTitle = metadata.title;
-                                    }
-                                } catch (e) {
-                                    console.error('Error parsing metadata:', e);
-                                }
-                            }
-                            
-                            // Store the document title
-                            localStorage.setItem(`document_${docHash}_title`, docTitle);
-                            
-                            // Open the document viewer with the hash
-                            window.open(`view-document.html?doc=${docHash}`, '_blank');
+                            downloadAndOpenHTML(content, fileName, documentTitle);
                         })
                         .catch(error => {
                             console.error('Error fetching document content:', error);
@@ -339,6 +309,22 @@
                 updateDocumentInfo(metadataStr, viewConvertedLink);
             });
             
+            // Function to download and open HTML directly
+            function downloadAndOpenHTML(content, fileName, title) {
+                // Create a download link
+                const downloadLink = document.createElement('a');
+                downloadLink.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(content);
+                downloadLink.download = fileName;
+                
+                // Trigger download
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                
+                // Inform user
+                alert(`The document "${title}" has been downloaded and will open automatically in your browser.`);
+            }
+            
             // Set up the download button
             const downloadButton = document.getElementById('download-converted-doc');
             if (downloadButton) {
@@ -352,6 +338,7 @@
                     
                     // Try to get the filename
                     let filename = 'converted-document.html';
+                    let documentTitle = 'Converted Document';
                     if (metadataStr) {
                         try {
                             const metadata = JSON.parse(metadataStr);
@@ -360,6 +347,9 @@
                             } else if (metadata.title) {
                                 // Create filename from title
                                 filename = metadata.title.replace(/[^a-zA-Z0-9-_]/g, '-').replace(/-+/g, '-').toLowerCase() + '.html';
+                            }
+                            if (metadata.title) {
+                                documentTitle = metadata.title;
                             }
                         } catch (e) {
                             console.error('Error parsing metadata:', e);
@@ -506,18 +496,22 @@
             fetch(`${docId}.html`)
                 .then(response => response.text())
                 .then(content => {
-                    // Generate a unique hash for the document
-                    const docHash = Math.random().toString(36).substring(2, 15);
+                    // Download and open the HTML file directly
+                    const fileName = `${docId}.html`;
+                    const title = 'Irreducible: Consciousness, Life, Computers, and Human';
                     
-                    // Store document content with this hash
-                    localStorage.setItem(`document_${docHash}`, content);
+                    // Create a download link
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(content);
+                    downloadLink.download = fileName;
                     
-                    // Set a document title
-                    let docTitle = 'Irreducible: Consciousness, Life, Computers, and Human';
-                    localStorage.setItem(`document_${docHash}_title`, docTitle);
+                    // Trigger download
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
                     
-                    // Open the document viewer with the hash
-                    window.open(`view-document.html?doc=${docHash}`, '_blank');
+                    // Inform user
+                    alert(`The document "${title}" has been downloaded and will open automatically in your browser.`);
                 })
                 .catch(error => {
                     console.error('Error loading static document:', error);
@@ -526,6 +520,23 @@
                     // Fallback to direct link
                     window.open(`${docId}.html`, '_blank');
                 });
+        }
+
+        // Add a helper function to trigger downloads
+        function triggerDownload(content, filename) {
+            // Create a download link
+            const downloadLink = document.createElement('a');
+            downloadLink.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(content);
+            downloadLink.download = filename;
+            
+            // Trigger download
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            
+            // Clean up
+            setTimeout(() => {
+                document.body.removeChild(downloadLink);
+            }, 100);
         }
     </script>
 </body>
