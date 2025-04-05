@@ -7,10 +7,10 @@
     <meta http-equiv="pragma" content="no-cache">
     <meta http-equiv="expires" content="0">
     <meta name="timestamp" content="1712355600000">
-    <title>PDF Converter and Document Library - LATEST VERSION</title>
+    <title>PDF to HTML Converter - Online Document Publisher</title>
     <style>
         body {
-            font-family: 'Times New Roman', Times, serif;
+            font-family: Georgia, 'Times New Roman', Times, serif;
             line-height: 1.6;
             max-width: 1000px;
             margin: 0 auto;
@@ -27,24 +27,33 @@
             border-radius: 5px;
         }
         .nav a {
-            margin: 0 10px;
-            color: #007bff;
+            margin: 0 15px;
+            color: #0066cc;
             text-decoration: none;
             font-weight: bold;
+            font-size: 18px;
         }
         .nav a:hover {
             text-decoration: underline;
         }
         h1 {
-            font-size: 28px;
+            font-size: 32px;
             text-align: center;
             margin: 30px 0;
+            color: #222;
+        }
+        h2 {
+            font-size: 24px;
+            color: #0066cc;
+            margin-top: 20px;
+            margin-bottom: 15px;
         }
         .container {
             background-color: #fff;
-            border-radius: 5px;
+            border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            padding: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
         }
         .feature {
             margin-bottom: 30px;
@@ -55,27 +64,32 @@
             border-bottom: none;
         }
         .feature h2 {
-            color: #007bff;
             margin-top: 0;
         }
         .button {
             display: inline-block;
             padding: 10px 20px;
-            background-color: #007bff;
+            background-color: #0066cc;
             color: white;
             text-decoration: none;
             border-radius: 4px;
             font-weight: bold;
             margin-top: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
         }
         .button:hover {
-            background-color: #0056b3;
+            background-color: #0052a3;
         }
         .footer {
             text-align: center;
             margin-top: 30px;
             font-size: 14px;
             color: #777;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
         }
         .refresh-notice {
             background-color: #d4edda;
@@ -86,43 +100,575 @@
             text-align: center;
             font-weight: bold;
         }
+        
+        /* PDF Converter Form Styles */
+        form {
+            margin: 30px 0;
+            padding: 25px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        input[type="file"] {
+            display: block;
+            margin-bottom: 20px;
+            width: 100%;
+            padding: 10px 0;
+        }
+        input[type="text"] {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        #progress-container {
+            width: 100%;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            margin: 20px 0;
+            display: none;
+        }
+        #progress-bar {
+            width: 0%;
+            height: 30px;
+            background-color: #4CAF50;
+            border-radius: 5px;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning-box {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #fff3cd;
+            color: #856404;
+            border-radius: 5px;
+            border: 1px solid #ffeeba;
+        }
+        .recent-docs {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f0f7ff;
+            border-radius: 8px;
+            border: 1px solid #cce5ff;
+        }
+        .doc-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e6f2ff;
+        }
+        .doc-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        .doc-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+        .doc-meta {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .doc-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .doc-actions a {
+            padding: 5px 15px;
+            background-color: #0066cc;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+            display: inline-block;
+        }
+        .doc-actions a:hover {
+            background-color: #0052a3;
+        }
     </style>
 </head>
 <body>
     <div class="nav">
         <a href="index.html">Home</a>
-        <a href="upload.html?t=latest">PDF Converter</a>
-        <a href="documents.html?t=latest">Document Library</a>
+        <a href="converted/index.html">Public Documents</a>
     </div>
 
     <div class="refresh-notice">
-        This site was updated on: April 5, 2024 at 12:00 AM (LATEST VERSION)
+        Last Updated: April 5, 2024 — Fixed PDF conversion issues & enhanced document structures
     </div>
 
-    <h1>PDF Converter and Document Library - UPDATED VERSION</h1>
+    <h1>PDF to HTML Converter</h1>
     
     <div class="container">
         <div class="feature">
-            <h2>PDF to HTML Converter</h2>
-            <p>Convert your PDF files to beautiful HTML documents that preserve the original formatting and text. Our converter makes it easy to publish academic papers, books, and other documents online.</p>
-            <a href="upload.html?t=latest" class="button">Convert a PDF</a>
+            <h2>Convert PDF Files to Beautiful HTML Documents</h2>
+            <p>Transform your PDF files into web-friendly documents that preserve the original formatting while adding enhanced readability, responsive design, and better typography.</p>
+            <p>Perfect for publishing academic papers, books, articles, and other documents online!</p>
         </div>
         
-        <div class="feature">
-            <h2>Document Library</h2>
-            <p>Access your converted documents in our Document Library. You can view, download, and manage your HTML documents all in one place.</p>
-            <a href="documents.html?t=latest" class="button">Access Library</a>
-        </div>
+        <form id="upload-form">
+            <h2>Upload Your PDF</h2>
+            
+            <label for="pdf-file">Select PDF File:</label>
+            <input type="file" id="pdf-file" name="pdf-file" accept=".pdf" required>
+            
+            <label for="title">Document Title (optional):</label>
+            <input type="text" id="title" name="title" placeholder="Enter document title">
+            
+            <div id="progress-container">
+                <div id="progress-bar">0%</div>
+            </div>
+            
+            <div class="warning-box">
+                <strong>Note:</strong> Large PDFs (over 5MB) may cause browser memory issues when converting. For best results:
+                <ul style="margin-top: 5px; margin-bottom: 5px;">
+                    <li>Try optimizing your PDF before uploading (reduce image quality, etc.)</li>
+                    <li>For very large files, consider using desktop software like Adobe Acrobat</li>
+                    <li>If you experience errors, try splitting your PDF into smaller files</li>
+                </ul>
+            </div>
+            
+            <button type="submit" class="button">Convert PDF</button>
+        </form>
         
-        <div class="feature">
-            <h2>Document Viewer</h2>
-            <p>View your converted documents directly in your browser with our specialized document viewer.</p>
-            <a href="document-viewer.html?t=latest" class="button">Open Viewer</a>
+        <div id="status-message" class="status"></div>
+        
+        <div class="recent-docs" id="recent-documents">
+            <h2>Recent Documents</h2>
+            <p>Your converted documents will appear here. You can view them directly or download as HTML files.</p>
+            <div id="doc-list">
+                <!-- Documents will be dynamically added here -->
+                <div class="doc-item" id="irreducible-doc">
+                    <div class="doc-title">Irreducible: Consciousness, Life, Computers, and Human</div>
+                    <div class="doc-meta">Sample converted document</div>
+                    <div class="doc-actions">
+                        <a href="index.html" target="_blank">View</a>
+                        <a href="#" onclick="downloadDocument('irreducible'); return false;">Download</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     
     <div class="footer">
-        <p>Created with ❤️ | PDF Converter and Publisher Service | Updated Version</p>
+        <p>PDF to HTML Conversion Tool | <a href="https://github.com/freemanhui/publish_online" target="_blank">GitHub Repository</a></p>
     </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script>
+        // Set worker path for PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+        
+        document.getElementById('upload-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('pdf-file');
+            const title = document.getElementById('title').value || 'Converted Document';
+            const statusMessage = document.getElementById('status-message');
+            const progressContainer = document.getElementById('progress-container');
+            const progressBar = document.getElementById('progress-bar');
+            
+            if (!fileInput.files[0]) {
+                showStatus('Please select a PDF file', 'error');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            if (file.type !== 'application/pdf') {
+                showStatus('Please select a valid PDF file', 'error');
+                return;
+            }
+            
+            // Show progress bar
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            progressBar.textContent = '0%';
+            
+            try {
+                // Read the PDF file
+                showStatus('Reading PDF file...', 'success');
+                
+                const arrayBuffer = await readFileAsArrayBuffer(file);
+                
+                // Update progress
+                updateProgress(10);
+                
+                // Load the PDF using PDF.js
+                showStatus('Processing PDF...', 'success');
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                
+                // Update progress
+                updateProgress(20);
+                
+                // Extract text from each page
+                showStatus(`Extracting text from ${pdf.numPages} pages...`, 'success');
+                
+                const numPages = pdf.numPages;
+                const pageTexts = [];
+                const metadata = {
+                    title: title,
+                    date: new Date().toLocaleString(),
+                    fileName: file.name.replace(/\.pdf$/, '.html'),
+                    numPages: numPages
+                };
+                
+                for (let i = 1; i <= numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    pageTexts.push(pageText);
+                    
+                    // Update progress for each page
+                    const progressPercent = 20 + Math.floor((i / numPages) * 60);
+                    updateProgress(progressPercent);
+                    showStatus(`Processing page ${i} of ${numPages}...`, 'success');
+                }
+                
+                // Create HTML content
+                showStatus('Generating HTML...', 'success');
+                
+                // Create HTML structure
+                const htmlContent = createHTMLDocument(pageTexts, metadata);
+                
+                // Save HTML to localStorage
+                localStorage.setItem('convertedDocument', htmlContent);
+                localStorage.setItem('documentMetadata', JSON.stringify(metadata));
+                
+                // Update progress
+                updateProgress(95);
+                
+                // Create a safe filename for the HTML download
+                const filename = file.name.replace(/\.pdf$/, '');
+                const safeFilename = filename.replace(/[^a-z0-9]/gi, '-').toLowerCase() + '.html';
+                const publicFilename = safeFilename;
+                
+                try {
+                    const docMetadata = {
+                        title: title,
+                        date: new Date().toLocaleString(),
+                        numPages: numPages,
+                        fileName: safeFilename
+                    };
+                    
+                    // Create public document access UI
+                    const publicLinkContainer = document.createElement('div');
+                    publicLinkContainer.style.marginTop = '20px';
+                    publicLinkContainer.style.padding = '15px';
+                    publicLinkContainer.style.backgroundColor = '#f8f9fa';
+                    publicLinkContainer.style.border = '1px solid #dee2e6';
+                    publicLinkContainer.style.borderRadius = '4px';
+                    
+                    // Add document to Recent Documents section
+                    addDocumentToList(title, new Date().toLocaleString(), htmlContent, safeFilename);
+                    
+                    updateProgress(100);
+                    showStatus('✅ Conversion complete! Your document is ready to view or download.', 'success');
+                } catch (e) {
+                    console.error('Error creating HTML file:', e);
+                    showStatus('Error creating HTML file: ' + e.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error converting PDF:', error);
+                showStatus('Error converting PDF: ' + error.message, 'error');
+            }
+        });
+        
+        function readFileAsArrayBuffer(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+        
+        function createHTMLDocument(pageTexts, metadata) {
+            // Create a nicely formatted HTML document
+            let htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${metadata.title}</title>
+    <style>
+        body {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            color: #333;
+            background-color: #fff;
+            font-size: 18px;
+        }
+        header {
+            margin-bottom: 3em;
+            text-align: center;
+        }
+        .metadata {
+            font-size: 0.9em;
+            color: #666;
+            margin: 1em 0 2em;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .metadata div {
+            margin: 5px 0;
+        }
+        .metadata strong {
+            margin-right: 5px;
+        }
+        nav {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+        }
+        nav a {
+            display: inline-block;
+            margin: 0 10px;
+            color: #0066cc;
+            text-decoration: none;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+            line-height: 1.3;
+            color: #222;
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+        }
+        h1 {
+            font-size: 2.4em;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 0.3em;
+            margin-bottom: 1em;
+        }
+        h2 {
+            font-size: 1.8em;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.2em;
+        }
+        h3 {
+            font-size: 1.5em;
+        }
+        article {
+            margin-bottom: 3em;
+        }
+        section {
+            margin-bottom: 2em;
+            padding-bottom: 1em;
+        }
+        .page-number {
+            text-align: center;
+            color: #888;
+            font-size: 0.9em;
+            margin: 1.5em 0;
+            font-style: italic;
+            border-top: 1px solid #eee;
+            padding-top: 1em;
+        }
+        p {
+            margin-bottom: 1em;
+            text-align: justify;
+        }
+        footer {
+            margin-top: 3em;
+            padding-top: 1em;
+            border-top: 1px solid #eee;
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 15px;
+                font-size: 16px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="upload.html">PDF Converter</a>
+        <a href="converted/index.html">Public Documents</a>
+    </nav>
+    
+    <header>
+        <h1>${metadata.title}</h1>
+        <div class="metadata">
+            <div><strong>Title:</strong> ${metadata.title}</div>
+            <div><strong>Converted:</strong> ${metadata.date}</div>
+            <div><strong>Pages:</strong> ${metadata.numPages}</div>
+        </div>
+    </header>
+    
+    <article>`;
+
+            // Process each page
+            pageTexts.forEach((text, index) => {
+                const pageNumber = index + 1;
+                
+                htmlContent += `
+        <section id="page-${pageNumber}">
+            ${text.replace(/\n/g, '<br>')}
+            <div class="page-number">Page ${pageNumber} of ${metadata.numPages}</div>
+        </section>`;
+            });
+
+            // Close the HTML document
+            htmlContent += `
+    </article>
+    
+    <footer>
+        <p>Converted using <a href="upload.html">PDF to HTML Converter</a></p>
+    </footer>
+</body>
+</html>`;
+
+            return htmlContent;
+        }
+        
+        function showStatus(message, type) {
+            const statusMessage = document.getElementById('status-message');
+            statusMessage.textContent = message;
+            statusMessage.className = 'status ' + type;
+            statusMessage.style.display = 'block';
+        }
+        
+        function updateProgress(percent) {
+            const progressBar = document.getElementById('progress-bar');
+            progressBar.style.width = percent + '%';
+            progressBar.textContent = percent + '%';
+        }
+        
+        function addDocumentToList(title, date, htmlContent, filename) {
+            const docList = document.getElementById('doc-list');
+            
+            // Create document item container
+            const docItem = document.createElement('div');
+            docItem.className = 'doc-item';
+            
+            // Create document title
+            const docTitle = document.createElement('div');
+            docTitle.className = 'doc-title';
+            docTitle.textContent = title;
+            
+            // Create document metadata
+            const docMeta = document.createElement('div');
+            docMeta.className = 'doc-meta';
+            docMeta.textContent = `Converted on ${date}`;
+            
+            // Create actions container
+            const docActions = document.createElement('div');
+            docActions.className = 'doc-actions';
+            
+            // Create view button
+            const viewButton = document.createElement('a');
+            viewButton.textContent = 'View';
+            viewButton.href = '#';
+            viewButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Create a blob from the HTML content
+                const blob = new Blob([htmlContent], {type: 'text/html'});
+                const url = URL.createObjectURL(blob);
+                
+                // Open the HTML file in a new tab
+                window.open(url, '_blank');
+                
+                // Clean up the URL object after some time
+                setTimeout(() => {
+                    URL.revokeObjectURL(url);
+                }, 5000);
+            });
+            
+            // Create download button
+            const downloadButton = document.createElement('a');
+            downloadButton.textContent = 'Download';
+            downloadButton.href = '#';
+            downloadButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Create a blob from the HTML content
+                const blob = new Blob([htmlContent], {type: 'text/html'});
+                const url = URL.createObjectURL(blob);
+                
+                // Create a temporary link to trigger download
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                
+                // Clean up
+                document.body.removeChild(a);
+                setTimeout(() => {
+                    URL.revokeObjectURL(url);
+                }, 5000);
+            });
+            
+            // Add buttons to actions container
+            docActions.appendChild(viewButton);
+            docActions.appendChild(downloadButton);
+            
+            // Add elements to doc item
+            docItem.appendChild(docTitle);
+            docItem.appendChild(docMeta);
+            docItem.appendChild(docActions);
+            
+            // Add the new doc item to the top of the list
+            if (docList.firstChild) {
+                docList.insertBefore(docItem, docList.firstChild);
+            } else {
+                docList.appendChild(docItem);
+            }
+        }
+        
+        // Function to download the irreducible document
+        function downloadDocument(docId) {
+            if (docId === 'irreducible') {
+                // Create an anchor element to trigger download
+                const a = document.createElement('a');
+                a.href = 'index.html';
+                a.download = 'irreducible.html';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+        }
+    </script>
 </body>
 </html> 
