@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="expires" content="0">
+    <title>Converted Documents Library</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .nav {
+            background-color: #fff;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .nav a {
+            margin: 0 15px;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .nav a:hover {
+            text-decoration: underline;
+        }
+        h1 {
+            font-size: 28px;
+            text-align: center;
+            margin: 30px 0;
+        }
+        .document-container {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        .document-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .document-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px;
+            transition: background-color 0.2s;
+        }
+        .document-item:hover {
+            background-color: #f9f9f9;
+        }
+        .document-item:last-child {
+            border-bottom: none;
+        }
+        .document-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        .document-meta {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 10px;
+        }
+        .document-link {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        .document-link:hover {
+            background-color: #0056b3;
+        }
+        .instructions {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+        .instructions h2 {
+            margin-top: 0;
+        }
+        .instructions ol {
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="../upload.html">PDF Converter</a>
+        <a href="../documents.html">Document Library</a>
+        <a href="index.html">Converted Documents</a>
+    </div>
+
+    <h1>Publicly Accessible Converted Documents</h1>
+    
+    <div class="document-container">
+        <p>This page lists all converted HTML documents that are publicly accessible via direct URLs. These documents can be shared with others and accessed without requiring localStorage or conversion.</p>
+        
+        <ul class="document-list">
+            <li class="document-item">
+                <div class="document-title">Sample Converted Document</div>
+                <div class="document-meta">Example document demonstrating the formatting and structure of converted PDFs</div>
+                <a href="sample-document.html" class="document-link">View Document</a>
+            </li>
+            
+            <!-- Additional documents would be listed here as they are added -->
+        </ul>
+        
+        <div class="instructions">
+            <h2>How to Add Your Documents Here</h2>
+            <p>Since this site is hosted on GitHub Pages, adding new documents requires a few steps:</p>
+            <ol>
+                <li>Convert your PDF using the <a href="../upload.html">PDF Converter</a></li>
+                <li>Download the HTML file when prompted</li>
+                <li>Fork the <a href="https://github.com/freemanhui/publish_online" target="_blank">repository</a></li>
+                <li>Upload the HTML file to the <code>converted/</code> folder in your fork</li>
+                <li>Create a pull request, or if you're the site owner, commit directly to the repository</li>
+                <li>Once merged, your document will be accessible at <code>https://freemanhui.github.io/publish_online/converted/your-file-name.html</code></li>
+            </ol>
+            <p>For site owners: Add new entries to this index.html file to list all available documents.</p>
+        </div>
+    </div>
+</body>
+</html> 

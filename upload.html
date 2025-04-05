@@ -139,6 +139,7 @@
     <div class="nav">
         <a href="upload.html?t=latest">PDF Converter</a>
         <a href="documents.html?t=latest">Document Library</a>
+        <a href="converted/index.html">Public Documents</a>
     </div>
 
     <div class="refresh-notice">
@@ -524,62 +525,50 @@
                     // Store a smaller preview version
                     localStorage.setItem('lastConvertedDocument_preview', firstPageContent);
                     
-                    // After successful conversion, create and open a standalone HTML file
+                    // After successful conversion, create a static HTML file that can be publicly accessed
                     try {
-                        // Create the direct HTML file content
-                        const standaloneHtml = htmlContent;
-                        
-                        // Generate a unique ID for this document
-                        const uniqueId = Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
-                        
-                        // Store content in localStorage with this ID
-                        localStorage.setItem(`html_content_${uniqueId}`, standaloneHtml);
-                        localStorage.setItem(`html_title_${uniqueId}`, title);
-                        localStorage.setItem(`html_filename_${uniqueId}`, htmlFileName);
+                        // Create a downloadable HTML file
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(htmlContent);
+                        downloadLink.download = htmlFileName;
                         
                         // Show success message
                         showStatus('PDF converted successfully! Your document has been converted to HTML.', 'success');
                         
-                        // Create the clean HTTP URL - no query parameters needed now
-                        const viewerUrl = 'viewer.html';
+                        // Create a direct public URL for this document
+                        const publicFilename = htmlFileName; // Use the same filename
+                        const publicUrl = `converted/${publicFilename}`;
                         
-                        // Create a download link for direct download option
-                        const downloadLink = document.createElement('a');
-                        downloadLink.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(standaloneHtml);
-                        downloadLink.download = htmlFileName;
+                        // Create public document access UI
+                        const publicLinkContainer = document.createElement('div');
+                        publicLinkContainer.style.marginTop = '20px';
+                        publicLinkContainer.style.padding = '15px';
+                        publicLinkContainer.style.backgroundColor = '#f8f9fa';
+                        publicLinkContainer.style.border = '1px solid #dee2e6';
+                        publicLinkContainer.style.borderRadius = '4px';
                         
-                        // Ask if user wants to view the document now
-                        if (confirm('Document converted successfully! How would you like to view it?')) {
-                            // Open the document with a clean HTTP URL
-                            window.open(viewerUrl, '_blank');
-                        }
+                        // Explain that on GitHub Pages, direct file creation isn't possible
+                        publicLinkContainer.innerHTML = `
+                            <h3 style="margin-top: 0;">Making Your Document Publicly Accessible</h3>
+                            <p>Since this is hosted on GitHub Pages, we can't automatically create public files on the server.</p>
+                            <p><strong>To make your document publicly accessible:</strong></p>
+                            <ol>
+                                <li>Download the HTML file using the button below</li>
+                                <li>Fork the repository at <a href="https://github.com/freemanhui/publish_online" target="_blank">https://github.com/freemanhui/publish_online</a></li>
+                                <li>Create a folder named "converted" in your fork</li>
+                                <li>Upload the HTML file to that folder</li>
+                                <li>Your document will be accessible at: <code>https://yourusername.github.io/publish_online/converted/${publicFilename}</code></li>
+                            </ol>
+                            <p style="margin-top: 15px;"><strong>For the site owner:</strong> Create a "converted" folder in your repository and manually upload the HTML file there.</p>
+                        `;
                         
-                        // Always offer to save the file directly
-                        if (confirm('Would you like to download a copy of the HTML file to your device?')) {
-                            document.body.appendChild(downloadLink);
-                            downloadLink.click();
-                            document.body.removeChild(downloadLink);
-                        }
-                        
-                        // Add buttons for both options to the page
+                        // Add buttons for download
                         const buttonsContainer = document.createElement('div');
                         buttonsContainer.style.marginTop = '20px';
                         buttonsContainer.style.display = 'flex';
                         buttonsContainer.style.gap = '10px';
                         
-                        const viewButton = document.createElement('button');
-                        viewButton.textContent = `View "${title}" in browser`;
-                        viewButton.style.flex = '1';
-                        viewButton.style.padding = '10px';
-                        viewButton.style.backgroundColor = '#007bff';
-                        viewButton.style.color = 'white';
-                        viewButton.style.border = 'none';
-                        viewButton.style.borderRadius = '4px';
-                        viewButton.style.cursor = 'pointer';
-                        viewButton.onclick = function() {
-                            window.open(viewerUrl, '_blank');
-                        };
-                        
+                        // Download button
                         const downloadButton = document.createElement('button');
                         downloadButton.textContent = `Download "${htmlFileName}"`;
                         downloadButton.style.flex = '1';
@@ -591,40 +580,46 @@
                         downloadButton.style.cursor = 'pointer';
                         downloadButton.onclick = function() {
                             const link = document.createElement('a');
-                            link.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(standaloneHtml);
+                            link.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(htmlContent);
                             link.download = htmlFileName;
                             document.body.appendChild(link);
                             link.click();
                             document.body.removeChild(link);
                         };
                         
-                        buttonsContainer.appendChild(viewButton);
+                        // View in viewer button
+                        const viewButton = document.createElement('button');
+                        viewButton.textContent = `Preview in Viewer`;
+                        viewButton.style.flex = '1';
+                        viewButton.style.padding = '10px';
+                        viewButton.style.backgroundColor = '#007bff';
+                        viewButton.style.color = 'white';
+                        viewButton.style.border = 'none';
+                        viewButton.style.borderRadius = '4px';
+                        viewButton.style.cursor = 'pointer';
+                        viewButton.onclick = function() {
+                            // Store in localStorage for viewer to use
+                            localStorage.setItem('lastConvertedDocumentRaw', htmlContent);
+                            localStorage.setItem('lastConvertedMetadata', JSON.stringify({
+                                title: title,
+                                fileName: htmlFileName,
+                                date: new Date().toISOString()
+                            }));
+                            window.open('viewer.html', '_blank');
+                        };
+                        
+                        // Add buttons to container
                         buttonsContainer.appendChild(downloadButton);
+                        buttonsContainer.appendChild(viewButton);
                         
-                        // Add the buttons to the page
+                        // Add containers to the page
                         const statusDiv = document.getElementById('status-message');
-                        statusDiv.parentNode.insertBefore(buttonsContainer, statusDiv.nextSibling);
-                        
-                        // Display the clean URL
-                        const urlDisplay = document.createElement('div');
-                        urlDisplay.style.marginTop = '10px';
-                        urlDisplay.style.padding = '10px';
-                        urlDisplay.style.backgroundColor = '#f8f9fa';
-                        urlDisplay.style.border = '1px solid #dee2e6';
-                        urlDisplay.style.borderRadius = '4px';
-                        
-                        // Build the full URL with origin but no query parameters
-                        const origin = window.location.origin;
-                        const path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-                        const fullUrl = origin + path + viewerUrl;
-                        
-                        urlDisplay.innerHTML = `<strong>Document URL:</strong> <a href="${viewerUrl}" target="_blank">${fullUrl}</a>`;
-                        
-                        statusDiv.parentNode.insertBefore(urlDisplay, buttonsContainer.nextSibling);
+                        statusDiv.parentNode.insertBefore(publicLinkContainer, statusDiv.nextSibling);
+                        publicLinkContainer.appendChild(buttonsContainer);
                         
                     } catch (e) {
                         console.error('Error creating HTML file:', e);
-                        showStatus('Conversion successful but there was an issue opening the file.', 'warning');
+                        showStatus('Conversion successful but there was an issue creating the file.', 'warning');
                     }
                     
                 } catch (blobError) {
