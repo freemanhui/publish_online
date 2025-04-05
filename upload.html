@@ -137,8 +137,8 @@
 </head>
 <body>
     <div class="nav">
-        <a href="upload.html?t=latest">PDF Converter</a>
-        <a href="documents.html?t=latest">Document Library</a>
+        <a href="index.html">Home</a>
+        <a href="upload.html">PDF Converter</a>
         <a href="converted/index.html">Public Documents</a>
     </div>
 
@@ -638,10 +638,6 @@
                         };
                         
                         // Add buttons to container
-                        buttonsContainer.appendChild(downloadButton);
-                        buttonsContainer.appendChild(viewButton);
-                        
-                        // Add containers to the page
                         const statusDiv = document.getElementById('status-message');
                         statusDiv.parentNode.insertBefore(publicLinkContainer, statusDiv.nextSibling);
                         publicLinkContainer.appendChild(buttonsContainer);
@@ -757,6 +753,7 @@
             const redirectUri = window.location.origin + window.location.pathname;
             const scope = 'repo';
             
+            // Get DOM elements
             const authButton = document.getElementById('github-auth-button');
             const publishSection = document.getElementById('github-publish-section');
             const loginSection = document.getElementById('github-login-section');
@@ -765,85 +762,71 @@
             const resultDiv = document.getElementById('github-result');
             const usernameSpan = document.getElementById('github-username');
             
-            // Check if user is already authenticated
-            const token = localStorage.getItem('github_token');
-            if (token) {
-                // Fetch user info to verify token is still valid
-                fetch('https://api.github.com/user', {
-                    headers: {
-                        'Authorization': `token ${token}`
-                    }
-                })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        // Token expired or invalid
-                        localStorage.removeItem('github_token');
-                        localStorage.removeItem('github_username');
-                        throw new Error('Token invalid');
-                    }
-                })
-                .then(data => {
-                    // Show publish section
+            // For demonstration or development use - in a production environment,
+            // you would implement a complete GitHub OAuth flow with a backend service
+            const simulateGitHubAuth = () => {
+                // Show a notification about setting up GitHub OAuth
+                showResultMessage(`
+                    <h4>GitHub OAuth Setup Required</h4>
+                    <p>To enable direct publishing to GitHub, you need to:</p>
+                    <ol>
+                        <li>Create a GitHub OAuth App in your GitHub account settings</li>
+                        <li>Set the Authorization callback URL to: <code>${window.location.origin}${window.location.pathname}</code></li>
+                        <li>Update this code with your Client ID and add a server-side component for the OAuth flow</li>
+                    </ol>
+                    <p>For this demo, we'll simulate a successful authorization.</p>
+                    <button id="simulate-auth-success" style="background-color: #28a745; color: white; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;">
+                        Simulate Successful Auth
+                    </button>
+                `, 'info');
+                
+                // Add event listener to the simulate button
+                document.getElementById('simulate-auth-success').addEventListener('click', () => {
+                    // Simulate successful login
                     loginSection.style.display = 'none';
                     publishSection.style.display = 'block';
-                    usernameSpan.textContent = data.login;
-                    localStorage.setItem('github_username', data.login);
-                })
-                .catch(error => {
-                    console.error('Error verifying token:', error);
+                    
+                    // Get GitHub username from URL or use a default
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const username = urlParams.get('github_user') || 'freemanhui';
+                    
+                    usernameSpan.textContent = username;
+                    localStorage.setItem('github_username', username);
+                    localStorage.setItem('github_simulated', 'true');
+                    
+                    showResultMessage('Simulated authentication successful! You can now publish your document.', 'success');
                 });
-            }
+            };
             
             // Handle GitHub authentication
             authButton.addEventListener('click', () => {
-                const state = Math.random().toString(36).substring(2, 15);
-                localStorage.setItem('github_auth_state', state);
+                // For demo purposes, use the simulation flow
+                simulateGitHubAuth();
                 
+                // In a real implementation, you would use GitHub OAuth flow:
+                /*
+                const clientId = 'YOUR_GITHUB_CLIENT_ID';
+                const redirectUri = window.location.origin + window.location.pathname;
+                const scope = 'repo';
+                const state = Math.random().toString(36).substring(2, 15);
+                
+                localStorage.setItem('github_auth_state', state);
                 const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&state=${state}`;
                 window.location.href = authUrl;
+                */
             });
             
-            // Check for authentication response
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-            const state = urlParams.get('state');
-            
-            if (code && state) {
-                // Verify state
-                const savedState = localStorage.getItem('github_auth_state');
-                if (state === savedState) {
-                    // Exchange code for token (this would typically be done on a server)
-                    // For demo purposes, we'll assume it's successful
-                    // In a real implementation, you would make a server request to exchange the code
-                    
-                    showResultMessage('Authentication successful! You can now publish your document.', 'success');
-                    
-                    // Show publish section
-                    loginSection.style.display = 'none';
-                    publishSection.style.display = 'block';
-                    
-                    // In a real implementation, set the token from the server response
-                    // For demo, we'll use a mock token
-                    const mockToken = 'mock_token_' + Date.now();
-                    localStorage.setItem('github_token', mockToken);
-                    
-                    // Also set a mock username
-                    const mockUsername = 'github_user';
-                    usernameSpan.textContent = mockUsername;
-                    localStorage.setItem('github_username', mockUsername);
-                }
+            // Check if user is already "authenticated" in our simulation
+            if (localStorage.getItem('github_simulated') === 'true') {
+                loginSection.style.display = 'none';
+                publishSection.style.display = 'block';
+                
+                const username = localStorage.getItem('github_username') || 'freemanhui';
+                usernameSpan.textContent = username;
             }
             
             // Handle publish button
             publishButton.addEventListener('click', () => {
-                const token = localStorage.getItem('github_token');
-                if (!token) {
-                    showResultMessage('You must login first!', 'error');
-                    return;
-                }
-                
                 const commitMessage = document.getElementById('commit-message').value;
                 const documentPath = document.getElementById('document-path').value;
                 
@@ -856,37 +839,36 @@
                 publishButton.disabled = true;
                 publishButton.textContent = 'Publishing...';
                 
-                // Use real GitHub API call
-                publishToGitHub(token, documentPath, htmlContent, commitMessage)
-                    .then(result => {
-                        showResultMessage(`${result.message}<br><br>Your document will be available at:<br><code>https://${localStorage.getItem('github_username')}.github.io/publish_online/${documentPath}</code>`, 'success');
-                        
-                        // Update index.html
-                        const indexUpdateMessage = `Would you like to also update the index.html to include your document?`;
-                        
-                        if (confirm(indexUpdateMessage)) {
-                            updateIndexFile(token, metadata)
-                                .then(updateResult => {
-                                    showResultMessage(`${result.message}<br><br>${updateResult.message}<br><br>Your document will be available at:<br><code>https://${localStorage.getItem('github_username')}.github.io/publish_online/${documentPath}</code>`, 'success');
-                                })
-                                .catch(error => {
-                                    showResultMessage(`Document published, but there was an error updating the index: ${error.message}`, 'warning');
-                                });
-                        }
-                    })
-                    .catch(error => {
-                        showResultMessage(`Error publishing document: ${error.message}`, 'error');
-                    })
-                    .finally(() => {
-                        publishButton.disabled = false;
-                        publishButton.textContent = 'Publish to Repository';
-                    });
+                // For demo purposes, simulate a successful API call
+                setTimeout(() => {
+                    const username = localStorage.getItem('github_username') || 'freemanhui';
+                    
+                    // Create a downloadable version of the file
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(htmlContent);
+                    downloadLink.download = documentPath.split('/').pop();
+                    
+                    showResultMessage(`
+                        <h4>Document Ready for Publishing</h4>
+                        <p>In a fully configured system, your document would be automatically committed to GitHub.</p>
+                        <p>For now, you can:</p>
+                        <ol>
+                            <li><a href="${downloadLink.href}" download="${downloadLink.download}" style="color: #0366d6;">Download the HTML file</a></li>
+                            <li>Manually upload it to your repository at: <code>https://github.com/${username}/publish_online/</code></li>
+                        </ol>
+                        <p>Once uploaded to the repository, your document will be accessible at:</p>
+                        <code>https://${username}.github.io/publish_online/${documentPath}</code>
+                    `, 'success');
+                    
+                    publishButton.disabled = false;
+                    publishButton.textContent = 'Publish to Repository';
+                }, 1500);
             });
             
             // Handle logout
             logoutButton.addEventListener('click', () => {
-                localStorage.removeItem('github_token');
                 localStorage.removeItem('github_username');
+                localStorage.removeItem('github_simulated');
                 loginSection.style.display = 'block';
                 publishSection.style.display = 'none';
                 resultDiv.style.display = 'none';
@@ -909,164 +891,10 @@
                     resultDiv.style.backgroundColor = '#fff3cd';
                     resultDiv.style.color = '#856404';
                     resultDiv.style.border = '1px solid #ffeeba';
-                }
-            }
-            
-            // Real GitHub API calls
-            async function publishToGitHub(token, path, content, message) {
-                try {
-                    const username = localStorage.getItem('github_username');
-                    const repo = 'publish_online';
-                    const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${path}`;
-                    const branch = 'main';
-                    
-                    // Convert content to base64
-                    const contentBase64 = btoa(unescape(encodeURIComponent(content)));
-                    
-                    // Check if file already exists
-                    let sha = null;
-                    try {
-                        const checkResponse = await fetch(apiUrl, {
-                            method: 'GET',
-                            headers: {
-                                'Authorization': `token ${token}`,
-                                'Content-Type': 'application/json'
-                            }
-                        });
-                        
-                        if (checkResponse.status === 200) {
-                            const fileInfo = await checkResponse.json();
-                            sha = fileInfo.sha;
-                        }
-                    } catch (error) {
-                        console.log('File does not exist yet, will create new');
-                    }
-                    
-                    // Create request body
-                    const requestBody = {
-                        message: message,
-                        content: contentBase64,
-                        branch: branch
-                    };
-                    
-                    // If file exists, include the SHA
-                    if (sha) {
-                        requestBody.sha = sha;
-                    }
-                    
-                    // Commit the file
-                    const response = await fetch(apiUrl, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `token ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(requestBody)
-                    });
-                    
-                    if (!response.ok) {
-                        const error = await response.json();
-                        throw new Error(`GitHub API error: ${error.message}`);
-                    }
-                    
-                    const result = await response.json();
-                    
-                    return {
-                        success: true,
-                        message: 'Document successfully published to the repository!',
-                        data: result
-                    };
-                    
-                } catch (error) {
-                    console.error('Error publishing to GitHub:', error);
-                    throw new Error(`Failed to publish document: ${error.message}`);
-                }
-            }
-            
-            async function updateIndexFile(token, metadata) {
-                try {
-                    const username = localStorage.getItem('github_username');
-                    const repo = 'publish_online';
-                    const indexPath = 'converted/index.html';
-                    const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${indexPath}`;
-                    const branch = 'main';
-                    
-                    // First, get the current index.html file
-                    const getResponse = await fetch(apiUrl, {
-                        headers: {
-                            'Authorization': `token ${token}`
-                        }
-                    });
-                    
-                    if (!getResponse.ok) {
-                        throw new Error('Could not retrieve index.html file');
-                    }
-                    
-                    const indexFile = await getResponse.json();
-                    const currentContent = decodeURIComponent(escape(atob(indexFile.content)));
-                    
-                    // Parse the HTML content
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(currentContent, 'text/html');
-                    
-                    // Find the document list
-                    const documentList = doc.querySelector('.document-list');
-                    if (!documentList) {
-                        throw new Error('Could not find document list in index.html');
-                    }
-                    
-                    // Create new list item for the document
-                    const newItem = doc.createElement('li');
-                    newItem.className = 'document-item';
-                    
-                    // Clean the path for the link
-                    const documentFileName = metadata.fileName.replace(/^converted\//, '');
-                    
-                    // Set the HTML for the new item
-                    newItem.innerHTML = `
-                        <div class="document-title">${metadata.title}</div>
-                        <div class="document-meta">Added on ${new Date().toLocaleDateString()}</div>
-                        <a href="${documentFileName}" class="document-link">View Document</a>
-                    `;
-                    
-                    // Add the new item to the document list
-                    documentList.appendChild(newItem);
-                    
-                    // Serialize the modified HTML
-                    const serializer = new XMLSerializer();
-                    const updatedContent = serializer.serializeToString(doc);
-                    
-                    // Commit the updated index.html
-                    const commitMessage = `Add ${metadata.title} to document index`;
-                    const contentBase64 = btoa(unescape(encodeURIComponent(updatedContent)));
-                    
-                    const response = await fetch(apiUrl, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `token ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            message: commitMessage,
-                            content: contentBase64,
-                            sha: indexFile.sha,
-                            branch: branch
-                        })
-                    });
-                    
-                    if (!response.ok) {
-                        const error = await response.json();
-                        throw new Error(`GitHub API error: ${error.message}`);
-                    }
-                    
-                    return {
-                        success: true,
-                        message: 'Index.html updated to include your document!'
-                    };
-                    
-                } catch (error) {
-                    console.error('Error updating index file:', error);
-                    throw error;
+                } else if (type === 'info') {
+                    resultDiv.style.backgroundColor = '#d1ecf1';
+                    resultDiv.style.color = '#0c5460';
+                    resultDiv.style.border = '1px solid #bee5eb';
                 }
             }
         }
