@@ -357,43 +357,121 @@
                 // Create HTML structure
                 const htmlContent = createHTMLDocument(pageTexts, metadata);
                 
-                // Save HTML to localStorage
-                localStorage.setItem('convertedDocument', htmlContent);
-                localStorage.setItem('documentMetadata', JSON.stringify(metadata));
+                // Check estimated size of HTML content (rough estimation)
+                const estimatedSize = new Blob([htmlContent]).size;
+                const localStorageLimit = 5 * 1024 * 1024; // ~5MB is a safe limit for most browsers
                 
-                // Update progress
-                updateProgress(95);
-                
-                // Create a safe filename for the HTML download
-                const filename = file.name.replace(/\.pdf$/, '');
-                const safeFilename = filename.replace(/[^a-z0-9]/gi, '-').toLowerCase() + '.html';
-                const publicFilename = safeFilename;
-                
-                try {
-                    const docMetadata = {
-                        title: title,
-                        date: new Date().toLocaleString(),
-                        numPages: numPages,
-                        fileName: safeFilename
-                    };
+                if (estimatedSize > localStorageLimit) {
+                    // File is too large for localStorage, trigger direct download instead
+                    showStatus('Document is too large for browser storage. Preparing direct download...', 'success');
                     
-                    // Create public document access UI
-                    const publicLinkContainer = document.createElement('div');
-                    publicLinkContainer.style.marginTop = '20px';
-                    publicLinkContainer.style.padding = '15px';
-                    publicLinkContainer.style.backgroundColor = '#f8f9fa';
-                    publicLinkContainer.style.border = '1px solid #dee2e6';
-                    publicLinkContainer.style.borderRadius = '4px';
+                    // Create a safe filename for the HTML download
+                    const filename = file.name.replace(/\.pdf$/, '');
+                    const safeFilename = filename.replace(/[^a-z0-9]/gi, '-').toLowerCase() + '.html';
                     
-                    // Add document to Recent Documents section
+                    // Create blob and download link
+                    const blob = new Blob([htmlContent], {type: 'text/html'});
+                    const url = URL.createObjectURL(blob);
+                    
+                    // Show success message
+                    showStatus('✅ Conversion complete! Your document is now downloading.', 'success');
+                    updateProgress(100);
+                    
+                    // Create a temporary download link
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = url;
+                    downloadLink.download = safeFilename;
+                    
+                    // Add to Recent Documents section without storing in localStorage
                     addDocumentToList(title, new Date().toLocaleString(), htmlContent, safeFilename);
                     
-                    updateProgress(100);
-                    showStatus('✅ Conversion complete! Your document is ready to view or download.', 'success');
-                } catch (e) {
-                    console.error('Error creating HTML file:', e);
-                    showStatus('Error creating HTML file: ' + e.message, 'error');
+                    // Trigger download
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                    
+                    // Clean up the URL object
+                    setTimeout(() => {
+                        URL.revokeObjectURL(url);
+                    }, 5000);
+                    
+                } else {
+                    // File is small enough for localStorage, use the original approach
+                    try {
+                        // Save HTML to localStorage
+                        localStorage.setItem('convertedDocument', htmlContent);
+                        localStorage.setItem('documentMetadata', JSON.stringify(metadata));
+                        
+                        // Update progress
+                        updateProgress(95);
+                        
+                        // Create a safe filename for the HTML download
+                        const filename = file.name.replace(/\.pdf$/, '');
+                        const safeFilename = filename.replace(/[^a-z0-9]/gi, '-').toLowerCase() + '.html';
+                        const publicFilename = safeFilename;
+                        
+                        try {
+                            const docMetadata = {
+                                title: title,
+                                date: new Date().toLocaleString(),
+                                numPages: numPages,
+                                fileName: safeFilename
+                            };
+                            
+                            // Create public document access UI
+                            const publicLinkContainer = document.createElement('div');
+                            publicLinkContainer.style.marginTop = '20px';
+                            publicLinkContainer.style.padding = '15px';
+                            publicLinkContainer.style.backgroundColor = '#f8f9fa';
+                            publicLinkContainer.style.border = '1px solid #dee2e6';
+                            publicLinkContainer.style.borderRadius = '4px';
+                            
+                            // Add document to Recent Documents section
+                            addDocumentToList(title, new Date().toLocaleString(), htmlContent, safeFilename);
+                            
+                            updateProgress(100);
+                            showStatus('✅ Conversion complete! Your document is ready to view or download.', 'success');
+                        } catch (e) {
+                            console.error('Error creating HTML file:', e);
+                            showStatus('Error creating HTML file: ' + e.message, 'error');
+                        }
+                    } catch (e) {
+                        // If even with size check we still get localStorage error, fall back to direct download
+                        console.error('Error saving to localStorage:', e);
+                        showStatus('Storage error. Preparing direct download instead...', 'success');
+                        
+                        // Create a safe filename for the HTML download
+                        const filename = file.name.replace(/\.pdf$/, '');
+                        const safeFilename = filename.replace(/[^a-z0-9]/gi, '-').toLowerCase() + '.html';
+                        
+                        // Create blob and download link
+                        const blob = new Blob([htmlContent], {type: 'text/html'});
+                        const url = URL.createObjectURL(blob);
+                        
+                        // Add to Recent Documents section without storing in localStorage
+                        addDocumentToList(title, new Date().toLocaleString(), htmlContent, safeFilename);
+                        
+                        // Show success message
+                        showStatus('✅ Conversion complete! Your document is now downloading.', 'success');
+                        updateProgress(100);
+                        
+                        // Create a temporary download link
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = url;
+                        downloadLink.download = safeFilename;
+                        
+                        // Trigger download
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                        
+                        // Clean up the URL object
+                        setTimeout(() => {
+                            URL.revokeObjectURL(url);
+                        }, 5000);
+                    }
                 }
+                
             } catch (error) {
                 console.error('Error converting PDF:', error);
                 showStatus('Error converting PDF: ' + error.message, 'error');
@@ -602,8 +680,17 @@
             viewButton.addEventListener('click', function(e) {
                 e.preventDefault();
                 
+                // Try to get content from localStorage first (for small files)
+                let content = htmlContent;
+                if (!content && docMetadata && docMetadata.fileName) {
+                    // For large files that were directly downloaded and not stored in localStorage
+                    // We'll inform the user they need to use the downloaded file
+                    alert('This document was too large for browser storage. Please use the downloaded HTML file to view the content.');
+                    return;
+                }
+                
                 // Create a blob from the HTML content
-                const blob = new Blob([htmlContent], {type: 'text/html'});
+                const blob = new Blob([content], {type: 'text/html'});
                 const url = URL.createObjectURL(blob);
                 
                 // Open the HTML file in a new tab
