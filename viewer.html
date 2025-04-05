@@ -83,35 +83,38 @@
     <div id="loading">Loading document...</div>
     <div id="error">
         <h2>Error Loading Document</h2>
-        <p>The document could not be found or has expired.</p>
-        <p><a href="upload.html">Return to PDF Converter</a></p>
+        <p>No document is available. Please convert a PDF first.</p>
+        <p><a href="upload.html">Go to PDF Converter</a></p>
     </div>
     <button id="download-button" class="download-button" style="display:none;">Download this document</button>
     <iframe id="content-frame"></iframe>
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Get the document ID from URL params
-            const urlParams = new URLSearchParams(window.location.search);
-            const contentId = urlParams.get('id');
+            // Get the document content directly from localStorage
+            const documentContent = localStorage.getItem('lastConvertedDocumentRaw');
             
-            if (!contentId) {
-                // No document ID specified
-                showError();
-                return;
+            // Get metadata for the filename and title
+            let documentTitle = 'Converted Document';
+            let filename = 'converted-document.html';
+            
+            const metadataStr = localStorage.getItem('lastConvertedMetadata');
+            if (metadataStr) {
+                try {
+                    const metadata = JSON.parse(metadataStr);
+                    if (metadata.title) {
+                        documentTitle = metadata.title;
+                    }
+                    if (metadata.fileName) {
+                        filename = metadata.fileName;
+                    }
+                } catch (e) {
+                    console.error('Error parsing metadata:', e);
+                }
             }
             
-            // Get the document content from localStorage
-            const contentKey = `html_content_${contentId}`;
-            const titleKey = `html_title_${contentId}`;
-            const filenameKey = `html_filename_${contentId}`;
-            
-            const documentContent = localStorage.getItem(contentKey);
-            const documentTitle = localStorage.getItem(titleKey) || 'Document Viewer';
-            const filename = localStorage.getItem(filenameKey) || 'document.html';
-            
             if (!documentContent) {
-                // Document not found
+                // No document found
                 showError();
                 return;
             }

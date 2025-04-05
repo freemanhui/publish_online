@@ -540,8 +540,8 @@
                         // Show success message
                         showStatus('PDF converted successfully! Your document has been converted to HTML.', 'success');
                         
-                        // Create the clean HTTP URL
-                        const viewerUrl = `viewer.html?id=${uniqueId}`;
+                        // Create the clean HTTP URL - no query parameters needed now
+                        const viewerUrl = 'viewer.html';
                         
                         // Create a download link for direct download option
                         const downloadLink = document.createElement('a');
@@ -613,7 +613,11 @@
                         urlDisplay.style.border = '1px solid #dee2e6';
                         urlDisplay.style.borderRadius = '4px';
                         
-                        const fullUrl = window.location.origin + '/' + viewerUrl;
+                        // Build the full URL with origin but no query parameters
+                        const origin = window.location.origin;
+                        const path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+                        const fullUrl = origin + path + viewerUrl;
+                        
                         urlDisplay.innerHTML = `<strong>Document URL:</strong> <a href="${viewerUrl}" target="_blank">${fullUrl}</a>`;
                         
                         statusDiv.parentNode.insertBefore(urlDisplay, buttonsContainer.nextSibling);

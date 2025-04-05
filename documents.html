@@ -311,16 +311,38 @@
             
             // Function to download and open HTML directly
             function downloadAndOpenHTML(content, fileName, title) {
-                // Generate a unique ID for this document
-                const uniqueId = Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
+                // Store the content in localStorage for the viewer page
+                localStorage.setItem('lastConvertedDocumentRaw', content);
                 
-                // Store content in localStorage with this ID
-                localStorage.setItem(`html_content_${uniqueId}`, content);
-                localStorage.setItem(`html_title_${uniqueId}`, title);
-                localStorage.setItem(`html_filename_${uniqueId}`, fileName);
+                // Update metadata if available
+                const metadataStr = localStorage.getItem('lastConvertedMetadata');
+                if (metadataStr) {
+                    try {
+                        const metadata = JSON.parse(metadataStr);
+                        metadata.title = title;
+                        metadata.fileName = fileName;
+                        localStorage.setItem('lastConvertedMetadata', JSON.stringify(metadata));
+                    } catch (e) {
+                        // If parsing fails, create new metadata
+                        const newMetadata = {
+                            title: title,
+                            fileName: fileName,
+                            date: new Date().toISOString()
+                        };
+                        localStorage.setItem('lastConvertedMetadata', JSON.stringify(newMetadata));
+                    }
+                } else {
+                    // Create new metadata if none exists
+                    const newMetadata = {
+                        title: title,
+                        fileName: fileName,
+                        date: new Date().toISOString()
+                    };
+                    localStorage.setItem('lastConvertedMetadata', JSON.stringify(newMetadata));
+                }
                 
                 // Create the clean HTTP URL
-                const viewerUrl = `viewer.html?id=${uniqueId}`;
+                const viewerUrl = 'viewer.html';
                 
                 // Open the document with a clean HTTP URL
                 window.open(viewerUrl, '_blank');
@@ -497,21 +519,23 @@
             fetch(`${docId}.html`)
                 .then(response => response.text())
                 .then(content => {
-                    // Generate a unique ID for this document
-                    const uniqueId = Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
+                    // Store the content directly in localStorage
+                    localStorage.setItem('lastConvertedDocumentRaw', content);
+                    
+                    // Set up metadata
                     const fileName = `${docId}.html`;
                     const title = 'Irreducible: Consciousness, Life, Computers, and Human';
                     
-                    // Store content in localStorage with this ID
-                    localStorage.setItem(`html_content_${uniqueId}`, content);
-                    localStorage.setItem(`html_title_${uniqueId}`, title);
-                    localStorage.setItem(`html_filename_${uniqueId}`, fileName);
+                    // Create or update metadata
+                    const newMetadata = {
+                        title: title,
+                        fileName: fileName,
+                        date: new Date().toISOString()
+                    };
+                    localStorage.setItem('lastConvertedMetadata', JSON.stringify(newMetadata));
                     
-                    // Create the clean HTTP URL
-                    const viewerUrl = `viewer.html?id=${uniqueId}`;
-                    
-                    // Open the document with a clean HTTP URL
-                    window.open(viewerUrl, '_blank');
+                    // Open with clean URL
+                    window.open('viewer.html', '_blank');
                 })
                 .catch(error => {
                     console.error('Error loading static document:', error);
