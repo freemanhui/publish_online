@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="expires" content="0">
+    <title>Document Viewer</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #f5f5f5;
+        }
+        #loading {
+            text-align: center;
+            margin-top: 100px;
+            font-family: Arial, sans-serif;
+        }
+        #error {
+            display: none;
+            text-align: center;
+            margin-top: 100px;
+            color: #721c24;
+            background-color: #f8d7da;
+            padding: 20px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .nav {
+            background-color: #fff;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .nav a {
+            margin: 0 15px;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .nav a:hover {
+            text-decoration: underline;
+        }
+        .download-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            max-width: 300px;
+        }
+        .download-button:hover {
+            background-color: #45a049;
+        }
+        #content-frame {
+            display: none;
+            width: 100%;
+            height: calc(100vh - 60px);
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="upload.html?t=latest">PDF Converter</a>
+        <a href="documents.html?t=latest">Document Library</a>
+    </div>
+    
+    <div id="loading">Loading document...</div>
+    <div id="error">
+        <h2>Error Loading Document</h2>
+        <p>The document could not be found or has expired.</p>
+        <p><a href="upload.html">Return to PDF Converter</a></p>
+    </div>
+    <button id="download-button" class="download-button" style="display:none;">Download this document</button>
+    <iframe id="content-frame"></iframe>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get the document ID from URL params
+            const urlParams = new URLSearchParams(window.location.search);
+            const contentId = urlParams.get('id');
+            
+            if (!contentId) {
+                // No document ID specified
+                showError();
+                return;
+            }
+            
+            // Get the document content from localStorage
+            const contentKey = `html_content_${contentId}`;
+            const titleKey = `html_title_${contentId}`;
+            const filenameKey = `html_filename_${contentId}`;
+            
+            const documentContent = localStorage.getItem(contentKey);
+            const documentTitle = localStorage.getItem(titleKey) || 'Document Viewer';
+            const filename = localStorage.getItem(filenameKey) || 'document.html';
+            
+            if (!documentContent) {
+                // Document not found
+                showError();
+                return;
+            }
+            
+            // Set the document title
+            document.title = documentTitle;
+            
+            // Create a blob URL for the iframe
+            const blob = new Blob([documentContent], { type: 'text/html' });
+            const blobUrl = URL.createObjectURL(blob);
+            
+            // Set up the iframe
+            const iframe = document.getElementById('content-frame');
+            iframe.src = blobUrl;
+            iframe.style.display = 'block';
+            
+            // Hide the loading message
+            document.getElementById('loading').style.display = 'none';
+            
+            // Set up the download button
+            const downloadButton = document.getElementById('download-button');
+            downloadButton.textContent = `Download "${filename}"`;
+            downloadButton.style.display = 'block';
+            downloadButton.addEventListener('click', () => {
+                const link = document.createElement('a');
+                link.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(documentContent);
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+            
+            // Clean up the blob URL when the page is unloaded
+            window.addEventListener('unload', () => {
+                URL.revokeObjectURL(blobUrl);
+            });
+        });
+        
+        function showError() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+        }
+    </script>
+</body>
+</html> 

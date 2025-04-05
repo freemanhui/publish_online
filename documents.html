@@ -311,18 +311,19 @@
             
             // Function to download and open HTML directly
             function downloadAndOpenHTML(content, fileName, title) {
-                // Create a download link
-                const downloadLink = document.createElement('a');
-                downloadLink.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(content);
-                downloadLink.download = fileName;
+                // Generate a unique ID for this document
+                const uniqueId = Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
                 
-                // Trigger download
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
+                // Store content in localStorage with this ID
+                localStorage.setItem(`html_content_${uniqueId}`, content);
+                localStorage.setItem(`html_title_${uniqueId}`, title);
+                localStorage.setItem(`html_filename_${uniqueId}`, fileName);
                 
-                // Inform user
-                alert(`The document "${title}" has been downloaded and will open automatically in your browser.`);
+                // Create the clean HTTP URL
+                const viewerUrl = `viewer.html?id=${uniqueId}`;
+                
+                // Open the document with a clean HTTP URL
+                window.open(viewerUrl, '_blank');
             }
             
             // Set up the download button
@@ -496,22 +497,21 @@
             fetch(`${docId}.html`)
                 .then(response => response.text())
                 .then(content => {
-                    // Download and open the HTML file directly
+                    // Generate a unique ID for this document
+                    const uniqueId = Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
                     const fileName = `${docId}.html`;
                     const title = 'Irreducible: Consciousness, Life, Computers, and Human';
                     
-                    // Create a download link
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(content);
-                    downloadLink.download = fileName;
+                    // Store content in localStorage with this ID
+                    localStorage.setItem(`html_content_${uniqueId}`, content);
+                    localStorage.setItem(`html_title_${uniqueId}`, title);
+                    localStorage.setItem(`html_filename_${uniqueId}`, fileName);
                     
-                    // Trigger download
-                    document.body.appendChild(downloadLink);
-                    downloadLink.click();
-                    document.body.removeChild(downloadLink);
+                    // Create the clean HTTP URL
+                    const viewerUrl = `viewer.html?id=${uniqueId}`;
                     
-                    // Inform user
-                    alert(`The document "${title}" has been downloaded and will open automatically in your browser.`);
+                    // Open the document with a clean HTTP URL
+                    window.open(viewerUrl, '_blank');
                 })
                 .catch(error => {
                     console.error('Error loading static document:', error);
