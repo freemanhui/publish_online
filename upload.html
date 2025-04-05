@@ -198,12 +198,32 @@
             padding: 40px 20px;
             color: #333;
             background-color: #fff;
+            font-size: 18px;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+            line-height: 1.3;
+            color: #222;
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
         }
         h1 {
             font-size: 2.2em;
-            margin-bottom: 1em;
-            color: #222;
             text-align: center;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 0.3em;
+            margin-bottom: 1em;
+        }
+        h2 {
+            font-size: 1.8em;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.2em;
+        }
+        h3 {
+            font-size: 1.5em;
+        }
+        h4 {
+            font-size: 1.3em;
         }
         .page {
             margin-bottom: 2em;
@@ -214,24 +234,76 @@
             text-align: center;
             color: #888;
             font-size: 0.9em;
-            margin: 1em 0;
+            margin: 1.5em 0;
+            font-style: italic;
         }
         p {
             margin-bottom: 1em;
+            text-align: justify;
         }
         .text-line {
             margin-bottom: 0.6em;
         }
+        .chapter-title {
+            font-weight: bold;
+            font-size: 1.8em;
+            margin-top: 2em;
+            margin-bottom: 1em;
+            text-align: center;
+            color: #000;
+        }
+        .section-title {
+            font-weight: bold;
+            font-size: 1.4em;
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+        }
+        .subsection-title {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-top: 1.2em;
+            margin-bottom: 0.6em;
+        }
+        .footnote {
+            font-size: 0.9em;
+            color: #555;
+            margin-left: 2em;
+            font-style: italic;
+        }
+        blockquote {
+            border-left: 4px solid #ddd;
+            padding-left: 1em;
+            margin-left: 0;
+            font-style: italic;
+            color: #555;
+        }
+        .table-of-contents {
+            background-color: #f8f8f8;
+            padding: 1.5em;
+            border-radius: 5px;
+            margin: 2em 0;
+        }
+        .table-of-contents h2 {
+            margin-top: 0;
+            border-bottom: none;
+        }
+        .indent1 { margin-left: 2em; }
+        .indent2 { margin-left: 4em; }
+        .indent3 { margin-left: 6em; }
         @media print {
             body {
                 padding: 0;
                 max-width: none;
+                font-size: 12pt;
             }
             .page-number {
                 position: absolute;
                 bottom: 20px;
                 width: 100%;
                 left: 0;
+            }
+            .no-print {
+                display: none;
             }
         }
     </style>
@@ -278,7 +350,47 @@
                         
                         // Only add non-empty lines to the output
                         if (lineText.trim().length > 0) {
-                            htmlContent += `\n        <div class="text-line">${lineText}</div>`;
+                            // Check for potential chapter titles, section headings, etc.
+                            // using heuristics like line length, all caps, etc.
+                            const cleanText = lineText.trim();
+                            
+                            // Get font info if available
+                            const fontSize = lineItems[0]?.fontSize || 0;
+                            const fontWeight = lineItems[0]?.fontWeight || 400;
+                            
+                            // Title detection heuristics
+                            const isShortLine = cleanText.length < 80;
+                            const isAllCaps = cleanText === cleanText.toUpperCase() && cleanText.length > 3;
+                            const startsWithChapter = /^chapter\s+\d+/i.test(cleanText);
+                            const isNumberedHeading = /^(\d+\.)+\s+[A-Z]/.test(cleanText);
+                            const looksLikeHeading = /^[IVX]+\.\s+/.test(cleanText) || /^[A-Z][a-z]+\s+\d+/.test(cleanText);
+                            const hasLargeFontSize = fontSize > 12; // Assuming a reference size
+                            const isBold = fontWeight >= 700;
+                            
+                            // Detect indentation
+                            const xPosition = lineItems[0]?.transform[4] || 0;
+                            const indentLevel = Math.floor(xPosition / 30); // Rough estimate
+                            const indentClass = indentLevel > 0 ? ` indent${Math.min(indentLevel, 3)}` : '';
+                            
+                            if (startsWithChapter || (isShortLine && isAllCaps)) {
+                                // Looks like a chapter title
+                                htmlContent += `\n        <h2 class="chapter-title">${cleanText}</h2>`;
+                            } else if (isNumberedHeading || (isShortLine && looksLikeHeading)) {
+                                // Looks like a section title
+                                htmlContent += `\n        <h3 class="section-title">${cleanText}</h3>`;
+                            } else if (isShortLine && (hasLargeFontSize || isBold)) {
+                                // Looks like a subsection title
+                                htmlContent += `\n        <h4 class="subsection-title">${cleanText}</h4>`;
+                            } else if (cleanText.startsWith('Note:') || cleanText.startsWith('*') || /^\[\d+\]/.test(cleanText)) {
+                                // Looks like a footnote
+                                htmlContent += `\n        <div class="footnote">${cleanText}</div>`;
+                            } else if (indentLevel > 0 && cleanText.length > 40) {
+                                // Might be a quote or indented paragraph
+                                htmlContent += `\n        <blockquote class="text-line${indentClass}">${cleanText}</blockquote>`;
+                            } else {
+                                // Regular text
+                                htmlContent += `\n        <div class="text-line${indentClass}">${cleanText}</div>`;
+                            }
                         }
                     });
                     
@@ -380,25 +492,19 @@
                         // Show success message
                         showStatus('PDF converted successfully! Your document has been converted to HTML.', 'success');
                         
-                        // Create a download link for the HTML file
-                        const downloadLink = document.createElement('a');
-                        downloadLink.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(standaloneHtml);
-                        downloadLink.download = htmlFileName;
-                        
                         // Ask if user wants to view the document now
                         if (confirm('Document converted successfully! View it now?')) {
-                            // Open HTML in a new window instead of using blob URL
-                            const newWindow = window.open();
-                            if (newWindow) {
-                                newWindow.document.write(standaloneHtml);
-                                newWindow.document.close();
-                                newWindow.document.title = title;
-                            } else {
-                                alert('Your browser blocked opening a new window. The document will be downloaded instead.');
-                                document.body.appendChild(downloadLink);
-                                downloadLink.click();
-                                document.body.removeChild(downloadLink);
-                            }
+                            // Generate a unique hash for this document
+                            const docHash = Math.random().toString(36).substring(2, 15);
+                            
+                            // Store the document content with this hash in localStorage
+                            localStorage.setItem(`document_${docHash}`, standaloneHtml);
+                            
+                            // Store document title with the hash
+                            localStorage.setItem(`document_${docHash}_title`, title);
+                            
+                            // Redirect to a dedicated viewer with the hash as parameter
+                            window.open(`view-document.html?doc=${docHash}`, '_blank');
                         }
                         
                         // Always offer to save the file

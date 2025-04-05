@@ -212,7 +212,7 @@
                     </p>
                 </div>
                 <div class="document-actions">
-                    <a href="index.html" target="_blank">View</a>
+                    <a href="#" onclick="loadStaticDocument('irreducible'); return false;">View</a>
                     <a href="index.html" download="irreducible.html">Download</a>
                 </div>
             </li>
@@ -269,52 +269,74 @@
                 console.log('Viewing document, URL available:', !!documentUrl);
                 console.log('Raw content available:', !!documentRaw);
                 
-                // Get document content from either source
-                let documentContent = '';
-                let filename = 'converted-document.html';
-                
+                // Handle document viewing with new approach
                 if (documentRaw) {
                     // Use the raw content if available
-                    documentContent = documentRaw;
+                    // Generate a unique hash for the document
+                    const docHash = Math.random().toString(36).substring(2, 15);
+                    
+                    // Store document content with this hash
+                    localStorage.setItem(`document_${docHash}`, documentRaw);
+                    
+                    // Get document title from metadata
+                    let docTitle = 'Converted Document';
+                    if (metadataStr) {
+                        try {
+                            const metadata = JSON.parse(metadataStr);
+                            if (metadata.title) {
+                                docTitle = metadata.title;
+                            }
+                        } catch (e) {
+                            console.error('Error parsing metadata:', e);
+                        }
+                    }
+                    
+                    // Store the document title
+                    localStorage.setItem(`document_${docHash}_title`, docTitle);
+                    
+                    // Open the document viewer with the hash
+                    window.open(`view-document.html?doc=${docHash}`, '_blank');
+                    
                 } else if (documentUrl) {
-                    // Try to fetch content from the URL (this is async but we'll handle it)
+                    // Fetch content from the URL
                     fetch(documentUrl)
                         .then(response => response.text())
                         .then(content => {
-                            createAndOpenHtmlFile(content, filename);
+                            // Generate a unique hash for the document
+                            const docHash = Math.random().toString(36).substring(2, 15);
+                            
+                            // Store document content with this hash
+                            localStorage.setItem(`document_${docHash}`, content);
+                            
+                            // Get document title from metadata
+                            let docTitle = 'Converted Document';
+                            if (metadataStr) {
+                                try {
+                                    const metadata = JSON.parse(metadataStr);
+                                    if (metadata.title) {
+                                        docTitle = metadata.title;
+                                    }
+                                } catch (e) {
+                                    console.error('Error parsing metadata:', e);
+                                }
+                            }
+                            
+                            // Store the document title
+                            localStorage.setItem(`document_${docHash}_title`, docTitle);
+                            
+                            // Open the document viewer with the hash
+                            window.open(`view-document.html?doc=${docHash}`, '_blank');
                         })
                         .catch(error => {
                             console.error('Error fetching document content:', error);
                             alert('Error loading document. Please try converting it again.');
                         });
-                    return; // Return early as we're handling this asynchronously
                 } else {
                     // No content available
                     alert('No document content available. Please convert a PDF first.');
-                    return;
                 }
                 
-                // Try to get the filename from metadata
-                if (metadataStr) {
-                    try {
-                        const metadata = JSON.parse(metadataStr);
-                        if (metadata.fileName) {
-                            filename = metadata.fileName;
-                        } else if (metadata.title) {
-                            // Create filename from title
-                            filename = metadata.title.replace(/[^a-zA-Z0-9-_]/g, '-').replace(/-+/g, '-').toLowerCase() + '.html';
-                        }
-                    } catch (e) {
-                        console.error('Error parsing metadata:', e);
-                    }
-                }
-                
-                // Create and open the HTML file with the content
-                if (documentContent) {
-                    createAndOpenHtmlFile(documentContent, filename);
-                }
-                
-                // Update the document information in the list
+                // Update the document information in the list (keep this functionality)
                 updateDocumentInfo(metadataStr, viewConvertedLink);
             });
             
@@ -433,81 +455,79 @@
                         let metaText = '';
                         if (metadata.date) {
                             const date = new Date(metadata.date);
-                            metaText += `Converted on ${date.toLocaleDateString()} `;
-                        } else if (documentDate) {
-                            const date = new Date(documentDate);
-                            metaText += `Converted on ${date.toLocaleDateString()} `;
+                            metaText += `Last Updated: ${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
                         }
-                        
-                        if (metadata.pageCount && metadata.pageCount !== 'Unknown') {
-                            metaText += `- ${metadata.pageCount} pages`;
+                        if (metadata.pageCount) {
+                            metaText += `, ${metadata.pageCount} pages`;
                         }
-                        
-                        metaElement.textContent = metaText || 'Recent PDF conversion';
+                        metaElement.textContent = metaText;
                     }
                 } catch (e) {
-                    console.error('Error parsing document metadata:', e);
+                    console.error('Error parsing metadata:', e);
                 }
             }
         }
         
-        // Create a function to update document info from metadata
-        function updateDocumentInfo(metadataStr, linkElement) {
+        // Update document information when the page loads
+        function updateDocumentInfo(metadataStr, viewConvertedLink) {
             if (metadataStr) {
                 try {
                     const metadata = JSON.parse(metadataStr);
-                    const docItem = linkElement.closest('.document-item');
-                    const titleElem = docItem.querySelector('.document-title');
-                    const metaElem = docItem.querySelector('.document-meta');
+                    const titleElement = document.getElementById('latest-doc-title');
+                    const metaElement = document.getElementById('latest-doc-meta');
                     
-                    if (titleElem && metadata.title) {
-                        titleElem.textContent = metadata.title;
+                    // Update the document title with actual name
+                    if (titleElement && metadata.title) {
+                        titleElement.textContent = metadata.title;
+                    } else if (titleElement && documentTitle) {
+                        titleElement.textContent = documentTitle;
                     }
                     
-                    if (metaElem && metadata.date) {
-                        const date = new Date(metadata.date);
-                        let pageInfo = '';
-                        if (metadata.pageCount && metadata.pageCount !== 'Unknown') {
-                            pageInfo = ` - ${metadata.pageCount} pages`;
+                    // Update the metadata with date and page count
+                    if (metaElement) {
+                        let metaText = '';
+                        if (metadata.date) {
+                            const date = new Date(metadata.date);
+                            metaText += `Last Updated: ${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
                         }
-                        metaElem.textContent = `Converted on ${date.toLocaleDateString()}${pageInfo}`;
+                        if (metadata.pageCount) {
+                            metaText += `, ${metadata.pageCount} pages`;
+                        }
+                        metaElement.textContent = metaText;
                     }
                 } catch (e) {
-                    console.error('Error updating document info:', e);
+                    console.error('Error parsing metadata:', e);
                 }
             }
         }
-        
-        // Add a helper function to trigger downloads
-        function triggerDownload(content, filename) {
-            // Create blob and download link
-            const blob = new Blob([content], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            
-            // Clean up
-            setTimeout(() => {
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }, 100);
-        }
-        
-        // Add a function to create and open an HTML file
-        function createAndOpenHtmlFile(content, filename) {
-            // Create a blob with the HTML content
-            const blob = new Blob([content], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            
-            // Open the HTML file in a new tab
-            window.open(url, '_blank');
+
+        // Function to load the static document
+        function loadStaticDocument(docId) {
+            // Fetch the document content
+            fetch(`${docId}.html`)
+                .then(response => response.text())
+                .then(content => {
+                    // Generate a unique hash for the document
+                    const docHash = Math.random().toString(36).substring(2, 15);
+                    
+                    // Store document content with this hash
+                    localStorage.setItem(`document_${docHash}`, content);
+                    
+                    // Set a document title
+                    let docTitle = 'Irreducible: Consciousness, Life, Computers, and Human';
+                    localStorage.setItem(`document_${docHash}_title`, docTitle);
+                    
+                    // Open the document viewer with the hash
+                    window.open(`view-document.html?doc=${docHash}`, '_blank');
+                })
+                .catch(error => {
+                    console.error('Error loading static document:', error);
+                    alert('Error loading the document. Please try again later.');
+                    
+                    // Fallback to direct link
+                    window.open(`${docId}.html`, '_blank');
+                });
         }
     </script>
-
-    <!-- Force refresh: ${new Date().toISOString()} -->
 </body>
-</html> 
+</html>
